@@ -30,8 +30,8 @@
               <input type="number" id="numTeamsInput" min="2" max="10" value="2" class="w-full bg-[#0f172a] border border-slate-600 rounded-lg px-4 py-2.5 focus:outline-none focus:border-emerald-500 transition">
             </div>
             <div class="flex items-end">
-              <button onclick="generateTeamInputs()" class="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-medium px-4 py-2.5 rounded-lg transition shadow-md flex items-center justify-center gap-2">
-                <i class="fas fa-sync"></i> Generate/Reset Teams
+              <button onclick="changeTeamCount()" class="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-medium px-4 py-2.5 rounded-lg transition shadow-md flex items-center justify-center gap-2">
+                <i class="fas fa-sync"></i> Update Team Count
               </button>
             </div>
           </div>
@@ -204,6 +204,15 @@
     </div>
   </div>
 
+  <div id="rosterModal" class="fixed inset-0 bg-black/70 backdrop-blur-sm hidden items-center justify-center z-50 p-4">
+    <div class="bg-[#1e293b] border border-slate-700 rounded-xl max-w-md w-full p-6 shadow-2xl relative">
+      <h3 id="rosterModalTitle" class="text-xl font-bold text-slate-100 mb-2">Team Roster</h3>
+      <p class="text-xs text-slate-400 mb-4">Manage or view current team selection.</p>
+      <div id="rosterModalList" class="space-y-2 max-h-64 overflow-y-auto mb-6 bg-[#0f172a] p-3 rounded-lg border border-slate-800"></div>
+      <button onclick="closeRosterModal()" class="w-full bg-slate-700 hover:bg-slate-600 text-slate-200 font-medium py-2.5 rounded-lg transition">Close</button>
+    </div>
+  </div>
+
   <div id="historyModal" class="fixed inset-0 bg-black/70 backdrop-blur-sm hidden items-center justify-center z-50 p-4">
     <div class="bg-[#1e293b] border border-slate-700 rounded-2xl max-w-3xl w-full p-6 shadow-2xl flex flex-col max-h-[85vh]">
       <div class="flex items-center justify-between mb-4 border-b border-slate-700 pb-3">
@@ -255,21 +264,33 @@
       matchLabel: "Game 1",
       scoreA: 0,
       scoreB: 0,
-      timeline: [] // Array of Objects: { time, text, team, scorer, assist }
+      timeline: []
     };
 
-    let globalHistoricalRegistry = []; // Aggregated match results array
+    let globalHistoricalRegistry = []; 
     
-    // Core Clock Variables
-    let countdownInterval = null;
-    let secondsRemaining = 1500;
-    let isTimerRunning = false;
+    // Core Background Time Engine Fields
+    let clockTickerInterval = null;
+    let clockState = {
+      isRunning: false,
+      msRemainingWhenPaused: 1500 * 1000,
+      expirationTimestamp: null, // Absolute Epoch Millisecond time boundary when timer = 0
+      activePage: 'setupPage' // Tracks navigation page layer state to restore on refresh
+    };
+
     let targetActiveSide = null; 
+    let workingTeamsCount = 2;
 
     // Initial Load Launch Engine
     window.addEventListener('DOMContentLoaded', () => {
       loadStateFromStorage();
-      generateTeamInputs();
+      buildTeamUIContainer();
+      
+      // Global background synchronization clock looping handler
+      clockTickerInterval = setInterval(synchronizedClockTick, 200);
+      
+      // Force page state recovery layout routing if returning mid-match
+      routeToSavedPageContext();
     });
 
     // -----------------------------------------------------------------
@@ -279,26 +300,45 @@
       localStorage.setItem('scorekeeper_config', JSON.stringify(configuration));
       localStorage.setItem('scorekeeper_activeBout', JSON.stringify(activeBout));
       localStorage.setItem('scorekeeper_history', JSON.stringify(globalHistoricalRegistry));
+      localStorage.setItem('scorekeeper_clockState', JSON.stringify(clockState));
     }
 
     function loadStateFromStorage() {
       const storedConfig = localStorage.getItem('scorekeeper_config');
       const storedBout = localStorage.getItem('scorekeeper_activeBout');
       const storedHistory = localStorage.getItem('scorekeeper_history');
+      const storedClock = localStorage.getItem('scorekeeper_clockState');
 
       if (storedConfig) {
         configuration = JSON.parse(storedConfig);
         document.getElementById('matchMinutes').value = configuration.matchMinutes;
         document.getElementById('totalMatches').value = configuration.totalMatches;
-        document.getElementById('numTeamsInput').value = Object.keys(configuration.teams).length || 2;
-        
-        // Re-enable Match Selection if teams exist
+        workingTeamsCount = Object.keys(configuration.teams).length || 2;
+        document.getElementById('numTeamsInput').value = workingTeamsCount;
         if (Object.keys(configuration.teams).length > 0) {
           enableDecideGame(true);
         }
       }
       if (storedBout) activeBout = JSON.parse(storedBout);
       if (storedHistory) globalHistoricalRegistry = JSON.parse(storedHistory);
+      if (storedClock) clockState = JSON.parse(storedClock);
+    }
+
+    function routeToSavedPageContext() {
+      // Hide all phases first
+      document.getElementById('setupPage').classList.add('hidden');
+      document.getElementById('matchupPage').classList.add('hidden');
+      document.getElementById('trackerPage').classList.add('hidden');
+
+      if (clockState.activePage === 'trackerPage' && activeBout.teamAKey) {
+        hydrateTrackerUI();
+        document.getElementById('trackerPage').classList.remove('hidden');
+      } else if (clockState.activePage === 'matchupPage') {
+        goToMatchupSelection();
+      } else {
+        clockState.activePage = 'setupPage';
+        document.getElementById('setupPage').classList.remove('hidden');
+      }
     }
 
     function clearAllStoredData() {
@@ -309,74 +349,202 @@
     }
 
     // -----------------------------------------------------------------
-    // PHASE 1: DYNAMIC INPUT INJECTION SCHEDULER
+    // PHASE 1: COMPONENT-BASED ROSTER BUILDER DESIGN
     // -----------------------------------------------------------------
-    function generateTeamInputs() {
-      const numTeams = parseInt(document.getElementById('numTeamsInput').value) || 2;
-      const container = document.getElementById('teamsContainer');
-      container.innerHTML = '';
-
-      // Check if we have pre-existing hydrated teams loaded from storage to populate fields
-      const existingTeamKeys = Object.keys(configuration.teams);
-
-      for (let i = 1; i <= numTeams; i++) {
-        const defaultName = existingTeamKeys[i - 1] || `Team ${String.fromCharCode(64 + i)}`;
-        const defaultMembers = configuration.teams[defaultName] ? configuration.teams[defaultName].join(', ') : '';
-
-        const card = document.createElement('div');
-        card.className = "bg-[#1e293b] p-5 rounded-xl border border-slate-700 shadow-md space-y-3 relative overflow-hidden group";
-        card.innerHTML = `
-          <div class="absolute left-0 top-0 bottom-0 w-1 bg-gradient-to-b from-cyan-500 to-blue-600"></div>
-          <div class="flex flex-col sm:flex-row gap-4 items-center">
-            <div class="w-full sm:w-1/3">
-              <label class="block text-xs font-bold text-slate-400 uppercase tracking-wide mb-1">Team ${i} Identity Name</label>
-              <input type="text" class="team-name-field w-full bg-[#0f172a] border border-slate-600 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-cyan-500 text-slate-200 font-semibold" value="${defaultName}" placeholder="e.g. Scorpions">
-            </div>
-            <div class="w-full sm:w-2/3">
-              <label class="block text-xs font-bold text-slate-400 uppercase tracking-wide mb-1">Roster Members (Comma Separated)</label>
-              <input type="text" class="team-members-field w-full bg-[#0f172a] border border-slate-600 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-cyan-500 text-slate-300" value="${defaultMembers}" placeholder="Taylor, John, Alex, Chris">
-            </div>
-          </div>
-        `;
-        container.appendChild(card);
-      }
+    function changeTeamCount() {
+      workingTeamsCount = parseInt(document.getElementById('numTeamsInput').value) || 2;
+      buildTeamUIContainer();
       enableDecideGame(false);
     }
 
-    function lockAndConfirmTeams() {
-      const nameInputs = document.querySelectorAll('.team-name-field');
-      const memberInputs = document.querySelectorAll('.team-members-field');
-      
-      configuration.teams = {};
-      configuration.matchMinutes = parseInt(document.getElementById('matchMinutes').value) || 25;
-      configuration.totalMatches = parseInt(document.getElementById('totalMatches').value) || 3;
+    function buildTeamUIContainer() {
+      const container = document.getElementById('teamsContainer');
+      container.innerHTML = '';
 
-      let valid = true;
-      nameInputs.forEach((input, index) => {
-        const nameClean = input.value.trim();
-        const membersClean = memberInputs[index].value.split(',')
-          .map(m => m.trim())
-          .filter(m => m.length > 0);
+      const existingTeamKeys = Object.keys(configuration.teams);
 
-        if (!nameClean) {
-          valid = false;
-          input.classList.add('border-rose-500');
-        } else {
-          input.classList.remove('border-rose-500');
-          configuration.teams[nameClean] = membersClean.length > 0 ? membersClean : ["Unknown Scorer"];
+      for (let i = 1; i <= workingTeamsCount; i++) {
+        const fallbackName = existingTeamKeys[i - 1] || `Team ${String.fromCharCode(64 + i)}`;
+        if (!configuration.teams[fallbackName]) {
+          configuration.teams[fallbackName] = [];
         }
-      });
 
-      if (!valid) {
-        alert("Please ensure all configured teams have an identity name assigned.");
+        const card = document.createElement('div');
+        card.className = "bg-[#1e293b] p-5 rounded-xl border border-slate-700 shadow-md space-y-4 relative overflow-hidden";
+        card.innerHTML = `
+          <div class="absolute left-0 top-0 bottom-0 w-1 bg-gradient-to-b from-cyan-500 to-blue-600"></div>
+          
+          <div class="flex flex-col md:flex-row gap-4 items-start md:items-center justify-between pb-3 border-b border-slate-700/50">
+            <div class="w-full md:w-1/2">
+              <label class="block text-xs font-bold text-slate-400 uppercase tracking-wide mb-1">Team ${i} Identity Name</label>
+              <input type="text" id="teamName_${i}" class="team-name-field w-full bg-[#0f172a] border border-slate-600 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-cyan-500 text-slate-200 font-semibold" value="${fallbackName}">
+            </div>
+            <div class="flex items-center gap-2 mt-4 md:mt-0 self-end md:self-auto">
+              <button onclick="displayRosterOverview(${i})" class="bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-300 text-xs px-3 py-2 rounded-lg font-medium transition flex items-center gap-1.5">
+                <i class="fas fa-users text-cyan-400"></i> View Members (<span id="rosterCountLabel_${i}">0</span>)
+              </button>
+            </div>
+          </div>
+
+          <div class="bg-[#0f172a]/40 p-3 rounded-lg border border-slate-800/80 flex gap-2 items-center">
+            <input type="text" id="memberIn_${i}" placeholder="Enter individual player name..." class="w-full bg-[#0f172a] border border-slate-700 rounded-lg px-3 py-1.5 text-xs text-slate-300 placeholder-slate-500 focus:outline-none focus:border-emerald-500">
+            <button onclick="appendPlayerItemToList(${i})" class="bg-emerald-600 hover:bg-emerald-500 text-white p-2 rounded-lg text-xs font-bold aspect-square flex items-center justify-center transition shadow" title="Add Member">
+              <i class="fas fa-plus"></i>
+            </button>
+            <button onclick="triggerRosterDeletionLayout(${i})" class="bg-rose-900/30 hover:bg-rose-900/60 border border-rose-800/50 text-rose-400 p-2 rounded-lg text-xs font-bold aspect-square flex items-center justify-center transition" title="Remove Member Selection">
+              <i class="fas fa-minus"></i>
+            </button>
+          </div>
+        `;
+        container.appendChild(card);
+        updateRosterCounterDisplayBadge(i);
+      }
+    }
+
+    function updateRosterCounterDisplayBadge(teamIndex) {
+      const nameInput = document.getElementById(`teamName_${teamIndex}`);
+      if (!nameInput) return;
+      const currentKey = nameInput.value.trim();
+      const players = configuration.teams[currentKey] || [];
+      const label = document.getElementById(`rosterCountLabel_${teamIndex}`);
+      if (label) label.innerText = players.length;
+    }
+
+    function appendPlayerItemToList(teamIndex) {
+      const nameInput = document.getElementById(`teamName_${teamIndex}`);
+      const memberInput = document.getElementById(`memberIn_${teamIndex}`);
+      
+      const teamKey = nameInput.value.trim();
+      const playerVal = memberInput.value.trim();
+
+      if (!teamKey) {
+        alert("Please set a Team Identity Name prior to appending members.");
+        return;
+      }
+      if (!playerVal) return;
+
+      // Transfer records safely if user changed the name input box string dynamically
+      if (!configuration.teams[teamKey]) {
+        configuration.teams[teamKey] = [];
+      }
+
+      if (configuration.teams[teamKey].includes(playerVal)) {
+        alert("This player is already listed on this team's roster.");
         return;
       }
 
+      configuration.teams[teamKey].push(playerVal);
+      memberInput.value = ''; // Reset input container field immediately
+      
+      updateRosterCounterDisplayBadge(teamIndex);
+      saveStateToStorage();
+    }
+
+    function displayRosterOverview(teamIndex) {
+      const nameInput = document.getElementById(`teamName_${teamIndex}`);
+      const teamKey = nameInput.value.trim();
+      const listContainer = document.getElementById('rosterModalList');
+      
+      document.getElementById('rosterModalTitle').innerText = `${teamKey || 'Unassigned'} Roster`;
+      listContainer.innerHTML = '';
+
+      const players = configuration.teams[teamKey] || [];
+      if (players.length === 0) {
+        listContainer.innerHTML = `<p class="text-slate-500 italic text-center py-4 text-xs">No roster members signed up yet.</p>`;
+      } else {
+        players.forEach(p => {
+          const block = document.createElement('div');
+          block.className = "flex items-center justify-between text-slate-300 text-xs py-1.5 border-b border-slate-800/60 last:border-0";
+          block.innerHTML = `<span><i class="fas fa-user text-slate-500 mr-2"></i>${p}</span>`;
+          listContainer.appendChild(block);
+        });
+      }
+
+      const modal = document.getElementById('rosterModal');
+      modal.classList.remove('hidden');
+      modal.classList.add('flex');
+    }
+
+    function triggerRosterDeletionLayout(teamIndex) {
+      const nameInput = document.getElementById(`teamName_${teamIndex}`);
+      const teamKey = nameInput.value.trim();
+      const listContainer = document.getElementById('rosterModalList');
+      
+      document.getElementById('rosterModalTitle').innerText = `Manage & Remove: ${teamKey}`;
+      listContainer.innerHTML = '';
+
+      const players = configuration.teams[teamKey] || [];
+      if (players.length === 0) {
+        listContainer.innerHTML = `<p class="text-slate-500 italic text-center py-4 text-xs">No members to remove.</p>`;
+      } else {
+        players.forEach((p, idx) => {
+          const block = document.createElement('div');
+          block.className = "flex items-center justify-between text-slate-300 text-xs p-1 bg-slate-900/50 rounded border border-slate-800";
+          block.innerHTML = `
+            <span><i class="fas fa-user text-slate-500 mr-2"></i>${p}</span>
+            <button onclick="deleteSingleRosterMember('${teamKey}', ${idx}, ${teamIndex})" class="bg-rose-950 hover:bg-rose-900 border border-rose-800 text-rose-300 text-[10px] px-2 py-1 rounded transition">
+              <i class="fas fa-trash-alt mr-1"></i> Kick
+            </button>
+          `;
+          listContainer.appendChild(block);
+        });
+      }
+
+      const modal = document.getElementById('rosterModal');
+      modal.classList.remove('hidden');
+      modal.classList.add('flex');
+    }
+
+    function deleteSingleRosterMember(teamKey, playerIndex, originalTeamIndex) {
+      if (configuration.teams[teamKey]) {
+        configuration.teams[teamKey].splice(playerIndex, 1);
+        saveStateToStorage();
+        updateRosterCounterDisplayBadge(originalTeamIndex);
+        
+        // Re-render modal workspace list box dynamically
+        triggerRosterDeletionLayout(originalTeamIndex);
+      }
+    }
+
+    function closeRosterModal() {
+      document.getElementById('rosterModal').classList.add('hidden');
+    }
+
+    function lockAndConfirmTeams() {
+      const nameFields = document.querySelectorAll('.team-name-field');
+      const synchronizedTeamsObj = {};
+      
+      configuration.matchMinutes = parseInt(document.getElementById('matchMinutes').value) || 25;
+      configuration.totalMatches = parseInt(document.getElementById('totalMatches').value) || 3;
+
+      let validationPassed = true;
+      nameFields.forEach((input, index) => {
+        const cleanedName = input.value.trim();
+        if (!cleanedName) {
+          validationPassed = false;
+          input.classList.add('border-rose-500');
+        } else {
+          input.classList.remove('border-rose-500');
+          // Re-map arrays to brand new locked validated list object state repo
+          const lookupOldNameField = Object.keys(configuration.teams)[index] || cleanedName;
+          synchronizedTeamsObj[cleanedName] = configuration.teams[lookupOldNameField] || configuration.teams[cleanedName] || [];
+          
+          if (synchronizedTeamsObj[cleanedName].length === 0) {
+            synchronizedTeamsObj[cleanedName].push("Solo Scorer");
+          }
+        }
+      });
+
+      if (!validationPassed) {
+        alert("Please confirm all generated team card slots possess an explicit identifier name.");
+        return;
+      }
+
+      configuration.teams = synchronizedTeamsObj;
       saveStateToStorage();
       enableDecideGame(true);
       
-      // Visual feedback confirmation flash
-      alert("Configuration Successfully Authenticated & Locked! 'Decide Game' selection menu is now accessible.");
+      alert("All setup configurations authenticated and locked! Match selection dashboard is ready.");
     }
 
     function enableDecideGame(status) {
@@ -396,9 +564,12 @@
     }
 
     // -----------------------------------------------------------------
-    // PHASE 2: MATCHUP DESIGN FIXTURE SELECTION
+    // PHASE 2: MATCHUP SELECTION ROUTINES
     // -----------------------------------------------------------------
     function goToMatchupSelection() {
+      clockState.activePage = 'matchupPage';
+      saveStateToStorage();
+
       document.getElementById('setupPage').classList.add('hidden');
       document.getElementById('matchupPage').classList.remove('hidden');
 
@@ -412,16 +583,14 @@
 
       const teamKeys = Object.keys(configuration.teams);
       teamKeys.forEach((team, idx) => {
-        // Hydrate team dropdown selection nodes
         const optA = new Option(team, team);
         const optB = new Option(team, team);
-        if (idx === 1) optB.selected = true; // Stagger default team choice index selection
+        if (idx === 1) optB.selected = true; 
 
         selectA.add(optA);
         selectB.add(optB);
       });
 
-      // Populate game round matches options counts selection list
       const totalRounds = parseInt(document.getElementById('totalMatches').value) || 3;
       for (let r = 1; r <= totalRounds; r++) {
         selectMatch.add(new Option(`Game ${r}`, `Game ${r}`));
@@ -429,6 +598,8 @@
     }
 
     function backToSetup() {
+      clockState.activePage = 'setupPage';
+      saveStateToStorage();
       document.getElementById('matchupPage').classList.add('hidden');
       document.getElementById('setupPage').classList.remove('hidden');
     }
@@ -439,21 +610,18 @@
       const matchLabel = document.getElementById('selectMatchNumber').value;
 
       if (teamA === teamB) {
-        alert("A team cannot battle against itself. Please establish two distinct teams.");
+        alert("A match requires two distinct team identities. Select different pairings.");
         return;
       }
 
-      // Check if this match layout already exists inside our archive system logs
       const preExistingMatch = globalHistoricalRegistry.find(m => m.matchLabel === matchLabel);
       if (preExistingMatch) {
-        if (!confirm(`Warning: Performance logs for ${matchLabel} already exist in archive. Launching will overwrite past records. Proceed?`)) {
+        if (!confirm(`Historical performance entry logs for ${matchLabel} already exist in registry. Launching will wipe past record dataset. Continue?`)) {
           return;
         }
-        // Purge matching item if user accepts replacement rewrite
         globalHistoricalRegistry = globalHistoricalRegistry.filter(m => m.matchLabel !== matchLabel);
       }
 
-      // Initialize core state values configurations
       activeBout = {
         teamAKey: teamA,
         teamBKey: teamB,
@@ -463,9 +631,11 @@
         timeline: []
       };
 
-      secondsRemaining = configuration.matchMinutes * 60;
-      isTimerRunning = false;
-      if (countdownInterval) clearInterval(countdownInterval);
+      // Initialize persistent background timestamp clocks matrices
+      clockState.isRunning = false;
+      clockState.msRemainingWhenPaused = configuration.matchMinutes * 60 * 1000;
+      clockState.expirationTimestamp = null;
+      clockState.activePage = 'trackerPage';
 
       saveStateToStorage();
       hydrateTrackerUI();
@@ -475,13 +645,12 @@
     }
 
     // -----------------------------------------------------------------
-    // PHASE 3: SCORING ENGINE & TIME MANAGER TRACKER MODULES
+    // PHASE 3: ABSOLUTE MILLISECOND CLOCK & CORE SYNCHRONIZER
     // -----------------------------------------------------------------
     function backToMatchup() {
-      if (isTimerRunning) toggleTimer(); // Stop clock engine execution sequence
-      
-      // Archive current snapshot data matrix before retreating back up a level
       commitActiveBoutToHistory();
+      clockState.activePage = 'matchupPage';
+      saveStateToStorage();
       
       document.getElementById('trackerPage').classList.add('hidden');
       document.getElementById('matchupPage').classList.remove('hidden');
@@ -494,55 +663,85 @@
       document.getElementById('scoreA').innerText = activeBout.scoreA;
       document.getElementById('scoreB').innerText = activeBout.scoreB;
       
-      updateTimerDisplayHTML();
       renderTimelineDOM();
-
-      const runBtn = document.getElementById('startStopBtn');
-      runBtn.innerText = "Start";
-      runBtn.className = "bg-emerald-500 hover:bg-emerald-400 text-[#0f172a] font-bold px-6 py-2 rounded-lg shadow-md transition uppercase tracking-wider text-sm";
+      refreshUIClockDisplayStrings();
     }
 
-    function updateTimerDisplayHTML() {
-      const minutes = Math.floor(secondsRemaining / 60);
-      const seconds = secondsRemaining % 60;
+    function calculateMsRemaining() {
+      if (!clockState.isRunning) {
+        return clockState.msRemainingWhenPaused;
+      }
+      const now = Date.now();
+      const delta = clockState.expirationTimestamp - now;
+      return Math.max(0, delta);
+    }
+
+    function refreshUIClockDisplayStrings() {
+      const msLeft = calculateMsRemaining();
+      const totalSecondsLeft = Math.ceil(msLeft / 1000);
+      
+      const mins = Math.floor(totalSecondsLeft / 60);
+      const secs = totalSecondsLeft % 60;
+      
       document.getElementById('timerDisplay').innerText = 
-        `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
-    }
+        `${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
 
-    function toggleTimer() {
       const runBtn = document.getElementById('startStopBtn');
-      if (isTimerRunning) {
-        clearInterval(countdownInterval);
-        isTimerRunning = false;
-        runBtn.innerText = "Start";
-        runBtn.className = "bg-emerald-500 hover:bg-emerald-400 text-[#0f172a] font-bold px-6 py-2 rounded-lg shadow-md transition uppercase tracking-wider text-sm";
-      } else {
-        isTimerRunning = true;
+      if (clockState.isRunning) {
         runBtn.innerText = "Stop";
         runBtn.className = "bg-rose-500 hover:bg-rose-400 text-white font-bold px-6 py-2 rounded-lg shadow-md transition uppercase tracking-wider text-sm";
-        
-        countdownInterval = setInterval(() => {
-          if (secondsRemaining > 0) {
-            secondsRemaining--;
-            updateTimerDisplayHTML();
-          } else {
-            clearInterval(countdownInterval);
-            isTimerRunning = false;
-            alert(`Time match constraint reached! ${activeBout.matchLabel} has concluded!`);
-            hydrateTrackerUI();
-          }
-        }, 1000);
+      } else {
+        runBtn.innerText = "Start";
+        runBtn.className = "bg-emerald-500 hover:bg-emerald-400 text-[#0f172a] font-bold px-6 py-2 rounded-lg shadow-md transition uppercase tracking-wider text-sm";
       }
     }
 
+    function synchronizedClockTick() {
+      // Loop execution routine to keep calculations aligned
+      if (clockState.activePage === 'trackerPage') {
+        refreshUIClockDisplayStrings();
+        
+        // Auto termination flag engine check
+        if (clockState.isRunning && Date.now() >= clockState.expirationTimestamp) {
+          clockState.isRunning = false;
+          clockState.msRemainingWhenPaused = 0;
+          clockState.expirationTimestamp = null;
+          saveStateToStorage();
+          alert(`Match time condition limit satisfied! ${activeBout.matchLabel} has officially completed!`);
+          hydrateTrackerUI();
+        }
+      }
+    }
+
+    function toggleTimer() {
+      if (clockState.isRunning) {
+        // Pausing match operation sequence logic
+        const msLeft = clockState.expirationTimestamp - Date.now();
+        clockState.msRemainingWhenPaused = Math.max(0, msLeft);
+        clockState.isRunning = false;
+        clockState.expirationTimestamp = null;
+      } else {
+        // Engaging core run sequence process execution
+        if (clockState.msRemainingWhenPaused <= 0) {
+          clockState.msRemainingWhenPaused = configuration.matchMinutes * 60 * 1000;
+        }
+        clockState.expirationTimestamp = Date.now() + clockState.msRemainingWhenPaused;
+        clockState.isRunning = true;
+      }
+      saveStateToStorage();
+      refreshUIClockDisplayStrings();
+    }
+
     function resetTimer() {
-      if (isTimerRunning) toggleTimer();
-      secondsRemaining = configuration.matchMinutes * 60;
-      updateTimerDisplayHTML();
+      clockState.isRunning = false;
+      clockState.msRemainingWhenPaused = configuration.matchMinutes * 60 * 1000;
+      clockState.expirationTimestamp = null;
+      saveStateToStorage();
+      refreshUIClockDisplayStrings();
     }
 
     // -----------------------------------------------------------------
-    // GOAL CAPTURE SELECTION MODAL CONTROLLERS
+    // EVENT MODAL HANDLING AND SCORING EXTENSION MATRIX
     // -----------------------------------------------------------------
     function triggerScorerModal(side) {
       targetActiveSide = side; 
@@ -557,18 +756,14 @@
       pSelect.innerHTML = '';
       aSelect.innerHTML = '';
 
-      // Populate rosters option fields
       const rosterList = configuration.teams[targetTeamKey] || [];
-      
-      // Inject fallback solo participant if empty
-      if (rosterList.length === 0) rosterList.push("Unlisted Scorer");
+      const safeRoster = rosterList.length > 0 ? rosterList : ["Solo Scorer"];
 
-      rosterList.forEach(p => {
+      safeRoster.forEach(p => {
         pSelect.add(new Option(p, p));
         aSelect.add(new Option(p, p));
       });
 
-      // Inject clear no-assist null item alternative object
       const nullOpt = new Option("None (Solo Goal)", "None");
       nullOpt.selected = true;
       aSelect.insertBefore(nullOpt, aSelect.firstChild);
@@ -587,7 +782,8 @@
       const scorer = document.getElementById('scorerSelect').value;
       const assist = document.getElementById('assistSelect').value;
       
-      const currentMinutes = Math.floor((configuration.matchMinutes * 60 - secondsRemaining) / 60);
+      const msSpent = (configuration.matchMinutes * 60 * 1000) - calculateMsRemaining();
+      const currentMinutes = Math.floor(msSpent / 60000);
       const timestampString = `${currentMinutes}'`;
 
       let logText = `⚽ Goal scored by <strong>${scorer}</strong>`;
@@ -627,7 +823,7 @@
 
       activeBout.timeline.forEach(evt => {
         const row = document.createElement('div');
-        row.className = "flex items-start gap-3 bg-[#0f172a]/60 p-2.5 rounded border border-slate-800/80 animate-fadeIn";
+        row.className = "flex items-start gap-3 bg-[#0f172a]/60 p-2.5 rounded border border-slate-800/80";
         row.innerHTML = `
           <span class="bg-slate-800 border border-slate-700 px-2 py-0.5 rounded text-xs text-cyan-400 font-mono font-bold">${evt.time}</span>
           <div class="text-slate-200 text-sm leading-relaxed">${evt.text}</div>
@@ -636,23 +832,16 @@
       });
     }
 
-    // -----------------------------------------------------------------
-    // HISTORICAL REGISTRY RECORD ARCHIVING ARCHITECTURE
-    // -----------------------------------------------------------------
     function commitActiveBoutToHistory() {
-      // Clean duplicate entry snapshots if rewrite occurs
+      if (!activeBout.teamAKey) return;
       globalHistoricalRegistry = globalHistoricalRegistry.filter(m => m.matchLabel !== activeBout.matchLabel);
-      
-      // Deep copy snapshot payload
       globalHistoricalRegistry.push(JSON.parse(JSON.stringify(activeBout)));
-      
-      // Sort structural order mapping chronologically
       globalHistoricalRegistry.sort((a, b) => a.matchLabel.localeCompare(b.matchLabel));
       saveStateToStorage();
     }
 
     function openHistoryModal() {
-      commitActiveBoutToHistory(); // Ensure real-time active data sets are mirrored correctly
+      commitActiveBoutToHistory();
       
       const tbody = document.getElementById('historyTableBody');
       tbody.innerHTML = '';
@@ -683,25 +872,17 @@
     }
 
     function closeHistoryModal() {
-      const modal = document.getElementById('historyModal');
-      modal.classList.add('hidden');
-      modal.classList.remove('flex');
+      document.getElementById('historyModal').classList.add('hidden');
     }
 
-    // -----------------------------------------------------------------
-    // SHEETJS EXCEL REPORT SPREADSHEET ENGINE GENERATOR
-    // -----------------------------------------------------------------
     function exportToExcel() {
       commitActiveBoutToHistory();
-      
       if (globalHistoricalRegistry.length === 0) {
-        alert("There is currently no statistical match data available to synthesize into an Excel document.");
+        alert("There is currently no statistical match data available to export.");
         return;
       }
 
       const workbook = XLSX.utils.book_new();
-
-      // SHEET 1: Match Summary Registry Layout Table
       const summaryDataMatrix = globalHistoricalRegistry.map(m => ({
         "Match Number": m.matchLabel,
         "Home Team (A)": m.teamAKey,
@@ -713,7 +894,6 @@
       const summarySheet = XLSX.utils.json_to_sheet(summaryDataMatrix);
       XLSX.utils.book_append_sheet(workbook, summarySheet, "Tournament Overview");
 
-      // SHEET 2: Granular Performance Scoring Breakdown Feed Logs
       const performanceLogs = [];
       globalHistoricalRegistry.forEach(m => {
         if (m.timeline.length === 0) {
@@ -725,7 +905,6 @@
             "Assist Component": "N/A"
           });
         } else {
-          // Flatten structures out chronologically for evaluation tracking
           [...m.timeline].reverse().forEach(t => {
             performanceLogs.push({
               "Match Instance": m.matchLabel,
@@ -740,7 +919,6 @@
       const detailingSheet = XLSX.utils.json_to_sheet(performanceLogs);
       XLSX.utils.book_append_sheet(workbook, detailingSheet, "Scoring Timeline Logs");
 
-      // Render binary array out write-out data generation
       XLSX.writeFile(workbook, `Tournament_Performance_Registry.xlsx`);
     }
   </script>
