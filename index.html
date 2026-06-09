@@ -1,0 +1,320 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tournament Scorekeeper Pro</title>
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+</head>
+<body class="bg-slate-900 text-slate-100 font-sans min-h-screen pb-10">
+
+    <header class="bg-slate-800 p-4 shadow-md sticky top-0 z-10 flex justify-between items-center">
+        <h1 class="text-xl font-bold tracking-wide text-emerald-400">🏆 ScoreTracker</h1>
+        <div class="space-x-2">
+            <button onclick="toggleDataModal()" class="bg-slate-700 hover:bg-slate-600 text-sm px-3 py-1.5 rounded font-medium border border-slate-600 transition">📊 View Data</button>
+            <button onclick="downloadExcel()" class="bg-emerald-600 hover:bg-emerald-500 text-sm px-3 py-1.5 rounded font-medium transition shadow">📥 Download Excel</button>
+        </div>
+    </header>
+
+    <main class="max-w-md mx-auto p-4 space-y-6">
+        <section class="bg-slate-800 p-5 rounded-2xl shadow-xl border border-slate-700 text-center space-y-3">
+            <div class="flex justify-center items-center gap-3">
+                <label class="text-sm font-semibold text-slate-400">Active Match:</label>
+                <select id="gameSelect" onchange="loadGame()" class="bg-slate-900 border border-slate-600 rounded px-2 py-1 text-sm focus:outline-none focus:border-emerald-500">
+                    <option value="Game 1">Game 1</option>
+                    <option value="Game 2">Game 2</option>
+                    <option value="Game 3">Game 3</option>
+                </select>
+            </div>
+            
+            <div id="clockDisplay" class="text-5xl font-mono font-black tracking-wider text-slate-50 py-2">25:00</div>
+            
+            <div class="flex justify-center gap-3">
+                <button id="startPauseBtn" onclick="toggleClock()" class="bg-emerald-500 hover:bg-emerald-600 text-slate-950 font-bold px-6 py-2 rounded-full shadow transition w-32">START</button>
+                <button onclick="resetClock()" class="bg-slate-700 hover:bg-slate-600 text-slate-300 font-medium px-4 py-2 rounded-full transition text-sm">Reset Clock</button>
+            </div>
+        </section>
+
+        <section class="grid grid-cols-2 gap-4">
+            <div class="bg-slate-800 p-4 rounded-2xl border-t-4 border-blue-500 shadow-lg text-center flex flex-col justify-between">
+                <div>
+                    <h2 class="text-lg font-bold text-blue-400">TEAM A</h2>
+                    <div id="teamAScoreDisplay" class="text-6xl font-black my-3">0</div>
+                </div>
+                <button onclick="openScoreModal('Team A')" class="bg-blue-600 hover:bg-blue-500 text-white font-bold py-3 px-4 rounded-xl shadow active:scale-95 transition mt-2">+ GOAL</button>
+            </div>
+
+            <div class="bg-slate-800 p-4 rounded-2xl border-t-4 border-red-500 shadow-lg text-center flex flex-col justify-between">
+                <div>
+                    <h2 class="text-lg font-bold text-red-400">TEAM B</h2>
+                    <div id="teamBScoreDisplay" class="text-6xl font-black my-3">0</div>
+                </div>
+                <button onclick="openScoreModal('Team B')" class="bg-red-600 hover:bg-red-500 text-white font-bold py-3 px-4 rounded-xl shadow active:scale-95 transition mt-2">+ GOAL</button>
+            </div>
+        </section>
+
+        <section class="bg-slate-800 p-4 rounded-2xl shadow-lg border border-slate-700">
+            <h3 class="text-xs font-bold uppercase tracking-wider text-slate-400 mb-2">Live Match Timeline</h3>
+            <div id="timelineContainer" class="space-y-1 max-h-48 overflow-y-auto font-mono text-xs divide-y divide-slate-700/50">
+                </div>
+        </section>
+    </main>
+
+    <div id="scoreModal" class="hidden fixed inset-0 bg-black/80 flex items-center justify-center p-4 z-50 backdrop-blur-xs">
+        <div class="bg-slate-800 border border-slate-700 p-6 rounded-2xl w-full max-w-sm space-y-4 shadow-2xl">
+            <h3 id="modalTitle" class="text-xl font-bold text-slate-50">Record Goal</h3>
+            <div>
+                <label class="block text-xs font-bold text-slate-400 mb-1">WHO SCORED?</label>
+                <select id="scorerSelect" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2.5 focus:outline-none focus:border-emerald-500"></select>
+            </div>
+            <div>
+                <label class="block text-xs font-bold text-slate-400 mb-1">WHO ASSISTED?</label>
+                <select id="assistSelect" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2.5 focus:outline-none focus:border-emerald-500"></select>
+            </div>
+            <div class="flex gap-3 pt-2">
+                <button onclick="closeScoreModal()" class="w-1/2 bg-slate-700 hover:bg-slate-600 py-2.5 rounded-lg font-medium transition">Cancel</button>
+                <button onclick="saveGoalEvent()" class="w-1/2 bg-emerald-500 hover:bg-emerald-600 text-slate-950 font-bold py-2.5 rounded-lg shadow transition">Confirm Goal</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="dataModal" class="hidden fixed inset-0 bg-black/80 flex items-center justify-center p-4 z-50 backdrop-blur-xs">
+        <div class="bg-slate-800 border border-slate-700 p-6 rounded-2xl w-full max-w-2xl max-h-[85vh] flex flex-col shadow-2xl">
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="text-xl font-bold text-slate-50">Stored Tournament Data</h3>
+                <button onclick="toggleDataModal()" class="text-slate-400 hover:text-slate-200 text-2xl font-bold">&times;</button>
+            </div>
+            <div class="overflow-x-auto flex-1 border border-slate-700 rounded-xl bg-slate-900">
+                <table class="w-full text-left border-collapse text-sm">
+                    <thead>
+                        <tr class="bg-slate-800 text-slate-300 border-b border-slate-700 text-xs font-bold uppercase tracking-wider">
+                            <th class="p-3">Match</th>
+                            <th class="p-3 text-center">Team A</th>
+                            <th class="p-3 text-center">Team B</th>
+                            <th class="p-3">Match Events / Timeline</th>
+                        </tr>
+                    </thead>
+                    <tbody id="modalTableBody" class="divide-y divide-slate-800 text-slate-300">
+                        </tbody>
+                </table>
+            </div>
+            <div class="flex justify-between items-center pt-4 mt-2">
+                <button onclick="clearAllData()" class="bg-red-900/40 hover:bg-red-900 text-red-300 text-xs font-medium px-3 py-2 rounded border border-red-700 transition">⚠️ Clear All Storage</button>
+                <button onclick="toggleDataModal()" class="bg-slate-700 hover:bg-slate-600 text-sm px-5 py-2 rounded-lg font-medium transition">Close Window</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Database Initialization
+        let database = JSON.parse(localStorage.getItem('sports_db')) || {
+            "Game 1": { scoreA: 0, scoreB: 0, events: [], clockSeconds: 1500 },
+            "Game 2": { scoreA: 0, scoreB: 0, events: [], clockSeconds: 1500 },
+            "Game 3": { scoreA: 0, scoreB: 0, events: [], clockSeconds: 1500 }
+        };
+
+        let currentMatch = "Game 1";
+        let timerInterval = null;
+        let activeScoringTeam = null;
+
+        // Dynamic 10-Player Rosters
+        const rosterA = Array.from({length: 10}, (_, i) => `Player A${i+1}`);
+        const rosterB = Array.from({length: 10}, (_, i) => `Player B${i+1}`);
+
+        window.onload = function() {
+            loadGame();
+        };
+
+        function saveToLocalStorage() {
+            localStorage.setItem('sports_db', JSON.stringify(database));
+        }
+
+        function loadGame() {
+            currentMatch = document.getElementById('gameSelect').value;
+            const currentData = database[currentMatch];
+            
+            document.getElementById('teamAScoreDisplay').innerText = currentData.scoreA;
+            document.getElementById('teamBScoreDisplay').innerText = currentData.scoreB;
+            
+            clearInterval(timerInterval);
+            timerInterval = null;
+            document.getElementById('startPauseBtn').innerText = "START";
+            document.getElementById('startPauseBtn').className = "bg-emerald-500 hover:bg-emerald-600 text-slate-950 font-bold px-6 py-2 rounded-full shadow transition w-32";
+            
+            updateClockDisplay(currentData.clockSeconds);
+            renderTimeline();
+        }
+
+        // Timer Implementation
+        function toggleClock() {
+            const btn = document.getElementById('startPauseBtn');
+            if (timerInterval) {
+                clearInterval(timerInterval);
+                timerInterval = null;
+                btn.innerText = "START";
+                btn.className = "bg-emerald-500 hover:bg-emerald-600 text-slate-950 font-bold px-6 py-2 rounded-full shadow transition w-32";
+            } else {
+                btn.innerText = "PAUSE";
+                btn.className = "bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold px-6 py-2 rounded-full shadow transition w-32";
+                timerInterval = setInterval(() => {
+                    if (database[currentMatch].clockSeconds > 0) {
+                        database[currentMatch].clockSeconds--;
+                        updateClockDisplay(database[currentMatch].clockSeconds);
+                        saveToLocalStorage();
+                    } else {
+                        clearInterval(timerInterval);
+                        timerInterval = null;
+                        alert(`${currentMatch} time has expired!`);
+                    }
+                }, 1000);
+            }
+        }
+
+        function resetClock() {
+            if(confirm("Reset clock back to 25 minutes?")) {
+                database[currentMatch].clockSeconds = 1500;
+                updateClockDisplay(1500);
+                saveToLocalStorage();
+            }
+        }
+
+        function updateClockDisplay(totalSeconds) {
+            const mins = Math.floor(totalSeconds / 60).toString().padStart(2, '0');
+            const secs = (totalSeconds % 60).toString().padStart(2, '0');
+            document.getElementById('clockDisplay').innerText = `${mins}:${secs}`;
+        }
+
+        function getClockString() {
+            const totalSeconds = database[currentMatch].clockSeconds;
+            const mins = Math.floor(totalSeconds / 60).toString().padStart(2, '0');
+            const secs = (totalSeconds % 60).toString().padStart(2, '0');
+            return `${mins}:${secs}`;
+        }
+
+        // Scoring Modal Trigger Flow
+        function openScoreModal(team) {
+            activeScoringTeam = team;
+            document.getElementById('modalTitle').innerText = `Record ${team} Goal`;
+            
+            const scorerDrop = document.getElementById('scorerSelect');
+            const assistDrop = document.getElementById('assistSelect');
+            const activeRoster = (team === 'Team A') ? rosterA : rosterB;
+            
+            scorerDrop.innerHTML = activeRoster.map(p => `<option value="${p}">${p}</option>`).join('');
+            assistDrop.innerHTML = `<option value="Unassisted">No Assist (Unassisted)</option>` + 
+                                   activeRoster.map(p => `<option value="${p}">${p}</option>`).join('');
+            
+            document.getElementById('scoreModal').classList.remove('hidden');
+        }
+
+        function closeScoreModal() {
+            document.getElementById('scoreModal').classList.add('hidden');
+        }
+
+        function saveGoalEvent() {
+            const scorer = document.getElementById('scorerSelect').value;
+            const assist = document.getElementById('assistSelect').value;
+            const timestamp = getClockString();
+            
+            if (activeScoringTeam === 'Team A') {
+                database[currentMatch].scoreA++;
+            } else {
+                database[currentMatch].scoreB++;
+            }
+
+            const logEntry = `[Time ${timestamp}] ${activeScoringTeam} Goal: ${scorer} (Assist: ${assist})`;
+            database[currentMatch].events.push(logEntry);
+            
+            saveToLocalStorage();
+            loadGame();
+            closeScoreModal();
+        }
+
+        function renderTimeline() {
+            const container = document.getElementById('timelineContainer');
+            const events = database[currentMatch].events;
+            if(events.length === 0) {
+                container.innerHTML = `<div class="text-slate-500 italic p-2">No goals scored yet in this match.</div>`;
+                return;
+            }
+            container.innerHTML = events.map(ev => `
+                <div class="py-1.5 px-1 text-slate-300 flex items-start gap-2">
+                    <span class="text-emerald-400 font-bold">⏱</span>
+                    <span>${ev}</span>
+                </div>
+            `).join('');
+            container.scrollTop = container.scrollHeight;
+        }
+
+        // View Current Database Storage
+        function toggleDataModal() {
+            const modal = document.getElementById('dataModal');
+            if (modal.classList.contains('hidden')) {
+                const tbody = document.getElementById('modalTableBody');
+                tbody.innerHTML = Object.keys(database).map(gameKey => {
+                    const g = database[gameKey];
+                    const timelineString = g.events.length > 0 ? g.events.join('; ') : 'No events logged';
+                    return `
+                        <tr class="hover:bg-slate-800/40">
+                            <td class="p-3 font-bold text-slate-100">${gameKey}</td>
+                            <td class="p-3 text-center text-blue-400 font-black">${g.scoreA}</td>
+                            <td class="p-3 text-center text-red-400 font-black">${g.scoreB}</td>
+                            <td class="p-3 text-xs text-slate-400 font-mono max-w-xs truncate" title="${timelineString}">${timelineString}</td>
+                        </tr>
+                    `;
+                }).join('');
+                modal.classList.remove('hidden');
+            } else {
+                modal.classList.add('hidden');
+            }
+        }
+
+        function clearAllData() {
+            if(confirm("Are you absolutely sure you want to clear all recorded match scores and timelines across all games? This cannot be undone.")) {
+                localStorage.removeItem('sports_db');
+                database = {
+                    "Game 1": { scoreA: 0, scoreB: 0, events: [], clockSeconds: 1500 },
+                    "Game 2": { scoreA: 0, scoreB: 0, events: [], clockSeconds: 1500 },
+                    "Game 3": { scoreA: 0, scoreB: 0, events: [], clockSeconds: 1500 }
+                };
+                saveToLocalStorage();
+                loadGame();
+                toggleDataModal();
+            }
+        }
+
+        // Pure Local Excel File Exporter (SheetJS)
+        function downloadExcel() {
+            // Transform internal JSON data object into flat rows for Excel representation
+            const excelRows = Object.keys(database).map(gameKey => {
+                return {
+                    "Match Name": gameKey,
+                    "Team A Total Score": database[gameKey].scoreA,
+                    "Team B Total Score": database[gameKey].scoreB,
+                    "Remaining Time Clock": getClockString(),
+                    "Complete Match Event Timeline": database[gameKey].events.join(' || ')
+                };
+            });
+
+            // SheetJS Processing Flow
+            const workbook = XLSX.utils.book_new();
+            const worksheet = XLSX.utils.json_to_sheet(excelRows);
+            
+            // Layout Tuning Column Widths for Excel readability
+            worksheet['!cols'] = [
+                { wch: 15 }, // Match Name
+                { wch: 20 }, // Team A Score
+                { wch: 20 }, // Team B Score
+                { wch: 22 }, // Clock Time
+                { wch: 75 }  // Event Timeline Log string
+            ];
+
+            XLSX.utils.book_append_sheet(workbook, worksheet, "Tournament Scoreboard");
+            
+            // Execute Instant Binary Save Dialog download
+            XLSX.writeFile(workbook, "Tournament_Scores_Export.xlsx");
+        }
+    </script>
+</body>
+</html>
