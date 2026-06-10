@@ -1,49 +1,805 @@
-function exportToExcel() {
-  commitActiveBoutToHistory();
-  if (globalHistoricalRegistry.length === 0) return alert("Historical data arrays are empty. Perform logging sequence before export processing.");
-  
-  const workbook = XLSX.utils.book_new();
-  
-  // TAB ONE: GENERAL TOURNAMENT ROUNDS OVERVIEW SUMMARY
-  const summaryDataMatrix = globalHistoricalRegistry.map(m => ({
-    "Match Number": m.matchLabel,
-    "Home Team (A)": m.teamAKey,
-    "Home Score": m.scoreA,
-    "Away Score": m.scoreB,
-    "Away Team (B)": m.teamBKey,
-    "Total Live Actions Logged": m.timeline.length
-  }));
-  const summarySheet = XLSX.utils.json_to_sheet(summaryDataMatrix);
-  XLSX.utils.book_append_sheet(workbook, summarySheet, "Tournament Overview");
-  
-  // TAB TWO: DETAILED PERFORMANCE ACTIONS (DEDICATED STATS TRACKING)
-  const performanceLogs = [];
-  globalHistoricalRegistry.forEach(m => {
-    if (m.timeline.length === 0) {
-      performanceLogs.push({
-        "Match Instance": m.matchLabel,
-        "Timestamp Reference": "N/A",
-        "Affiliated Team": "N/A",
-        "Event Action Type": "No Performance Tracked",
-        "Player Name / Scorer": "N/A",
-        "Assist Credit": "N/A"
-      });
-    } else {
-      // Parse events chronologically from game opening kickoff forward
-      [...m.timeline].reverse().forEach(t => {
-        performanceLogs.push({
-          "Match Instance": m.matchLabel,
-          "Timestamp Reference": t.time,
-          "Affiliated Team": t.team,
-          "Event Action Type": t.type ? t.type.toUpperCase() : "GOAL",
-          "Player Name / Scorer": t.player,
-          "Assist Credit": t.type === "Goal" ? (t.assist || "Unassisted") : "N/A"
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Tournament Scorekeeper Pro</title>
+  <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+</head>
+<body class="bg-[#0f172a] text-slate-100 font-sans min-h-screen">
+
+  <nav class="bg-[#1e293b] border-b border-slate-800 px-6 py-4 flex items-center justify-between shadow-md sticky top-0 z-40">
+    <div class="flex items-center gap-2 text-emerald-400 font-bold text-xl tracking-tight select-none">
+      <i class="fas fa-trophy text-amber-400"></i> <span>ScoreKeeper Pro</span>
+    </div>
+    <div class="flex items-center gap-3">
+      <button onclick="openHistoryModal()" class="bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-200 px-4 py-2 rounded-lg text-sm font-medium transition flex items-center gap-2 cursor-pointer">
+        <i class="fas fa-database text-cyan-400"></i> View Data
+      </button>
+      <button onclick="exportToExcel()" class="bg-emerald-600 hover:bg-emerald-500 text-white px-4 py-2 rounded-lg text-sm font-medium transition shadow-md flex items-center gap-2 cursor-pointer">
+        <i class="fas fa-file-excel"></i> Download Excel
+      </button>
+    </div>
+  </nav>
+
+  <div id="setupPage" class="max-w-4xl mx-auto px-4 py-8">
+    <header class="text-center mb-8">
+      <h1 class="text-4xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 to-cyan-400 mb-2">
+        Tournament Configuration
+      </h1>
+      <p class="text-slate-400">Configure your teams, players, and match settings.</p>
+    </header>
+
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+      <div class="md:col-span-2 space-y-6">
+        <div class="bg-[#1e293b] p-6 rounded-xl border border-slate-700 shadow-xl">
+          <h2 class="text-lg font-semibold mb-4 text-emerald-400 flex items-center gap-2">
+            <i class="fas fa-users-cog"></i> 1. Core Settings
+          </h2>
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+              <label class="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">Number of Teams</label>
+              <input type="number" id="numTeamsInput" min="2" max="10" value="2" class="w-full bg-[#0f172a] border border-slate-600 rounded-lg px-4 py-2 focus:outline-none focus:border-emerald-500 transition">
+            </div>
+            <div class="flex items-end">
+              <button onclick="changeTeamCount()" class="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-medium px-4 py-2 rounded-lg transition shadow-md flex items-center justify-center gap-2 cursor-pointer">
+                <i class="fas fa-sync"></i> Update Layout
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <div id="teamsContainer" class="space-y-4"></div>
+        
+        <div class="text-right">
+          <button onclick="lockAndConfirmTeams()" class="bg-cyan-600 hover:bg-cyan-500 text-white font-semibold px-6 py-3 rounded-lg transition shadow-lg flex items-center gap-2 ml-auto cursor-pointer">
+            <i class="fas fa-lock"></i> Confirm & Lock Teams
+          </button>
+        </div>
+      </div>
+
+      <div class="space-y-6">
+        <div class="bg-[#1e293b] p-6 rounded-xl border border-slate-700 shadow-xl sticky top-24">
+          <h2 class="text-lg font-semibold mb-4 text-cyan-400 flex items-center gap-2">
+            <i class="fas fa-sliders-h"></i> 2. Game Settings
+          </h2>
+          
+          <div class="space-y-4 mb-6">
+            <div>
+              <label class="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">Match Duration</label>
+              <div class="flex items-center gap-2">
+                <input type="number" id="matchMinutes" min="1" max="90" value="25" class="w-full bg-[#0f172a] border border-slate-600 rounded-lg px-3 py-2 text-center focus:outline-none focus:border-cyan-500">
+                <span class="text-sm text-slate-400">mins</span>
+              </div>
+            </div>
+            <div>
+              <label class="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">Total Matches Planned</label>
+              <input type="number" id="totalMatches" min="1" max="20" value="3" class="w-full bg-[#0f172a] border border-slate-600 rounded-lg px-3 py-2 text-center focus:outline-none focus:border-cyan-500">
+            </div>
+          </div>
+
+          <button onclick="goToMatchupSelection()" id="decideGameBtn" disabled class="w-full bg-slate-600 text-slate-400 font-bold py-3 rounded-lg transition flex items-center justify-center gap-2 cursor-not-allowed">
+            <i class="fas fa-calendar-alt"></i> Decide Game
+          </button>
+          <p id="lockWarning" class="text-xs text-amber-400/80 text-center mt-2">
+            <i class="fas fa-info-circle mr-1"></i> Lock configurations to initialize fixtures.
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div id="matchupPage" class="max-w-2xl mx-auto px-4 py-12 hidden">
+    <div class="bg-[#1e293b] p-8 rounded-2xl border border-slate-700 shadow-2xl text-center">
+      <h2 class="text-2xl font-bold text-cyan-400 mb-1">Fixture Dashboard</h2>
+      <p class="text-slate-400 text-sm mb-8">Set up the pairings for the upcoming round.</p>
+
+      <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 items-center mb-8">
+        <div class="bg-[#0f172a] p-4 rounded-xl border border-slate-700">
+          <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Home Team (A)</label>
+          <select id="selectTeamA" class="w-full bg-[#1e293b] border border-slate-600 rounded-lg p-2 text-center text-blue-400 font-semibold focus:outline-none"></select>
+        </div>
+        <div class="text-xl font-bold text-slate-500 uppercase tracking-widest py-2">vs</div>
+        <div class="bg-[#0f172a] p-4 rounded-xl border border-slate-700">
+          <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Away Team (B)</label>
+          <select id="selectTeamB" class="w-full bg-[#1e293b] border border-slate-600 rounded-lg p-2 text-center text-rose-400 font-semibold focus:outline-none"></select>
+        </div>
+      </div>
+
+      <div class="w-32 mx-auto mb-8">
+        <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Round Slot</label>
+        <select id="selectMatchNumber" class="w-full bg-[#0f172a] border border-slate-600 rounded-lg p-2 text-center text-slate-200 focus:outline-none"></select>
+      </div>
+
+      <div class="flex gap-4">
+        <button onclick="backToSetup()" class="w-1/2 bg-slate-700 hover:bg-slate-600 text-white font-semibold py-3 rounded-lg transition flex items-center justify-center gap-2 cursor-pointer">
+          <i class="fas fa-arrow-left"></i> Setup Configuration
+        </button>
+        <button onclick="launchLiveMatch()" class="w-1/2 bg-gradient-to-r from-emerald-600 to-cyan-600 hover:from-emerald-500 hover:to-cyan-500 text-white font-bold py-3 rounded-lg transition shadow-lg flex items-center justify-center gap-2 cursor-pointer">
+          OK <i class="fas fa-play"></i>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <div id="trackerPage" class="hidden max-w-4xl mx-auto px-4 py-8 space-y-6">
+    <div class="flex items-center justify-between">
+      <button onclick="backToMatchup()" class="text-slate-400 hover:text-white transition px-3 py-1.5 rounded-lg border border-slate-700 hover:bg-slate-800 text-sm flex items-center gap-1.5 cursor-pointer">
+        <i class="fas fa-chevron-left"></i> Change Matchup
+      </button>
+      <div id="matchLabelDisplay" class="bg-cyan-950 text-cyan-400 border border-cyan-800 text-xs font-bold px-3 py-1 rounded-full uppercase tracking-widest">Game 1</div>
+    </div>
+
+    <div class="bg-[#1e293b] border border-slate-700 rounded-2xl p-6 text-center max-w-md mx-auto shadow-xl">
+      <div id="timerDisplay" class="text-6xl font-mono font-bold text-slate-100 tracking-wider mb-3 select-none">25:00</div>
+      <div class="flex justify-center gap-3">
+        <button id="startStopBtn" onclick="toggleTimer()" class="bg-emerald-500 hover:bg-emerald-400 text-[#0f172a] font-bold px-6 py-2 rounded-lg shadow-md transition uppercase tracking-wider text-sm cursor-pointer">Start</button>
+        <button onclick="resetTimer()" class="bg-slate-700 hover:bg-slate-600 text-slate-300 font-medium px-4 py-2 rounded-lg transition text-sm cursor-pointer">Reset Clock</button>
+      </div>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <div class="bg-[#1e293b] border-t-4 border-blue-500 rounded-xl p-6 shadow-lg flex flex-col justify-between">
+        <div class="text-center">
+          <h3 id="displayTeamAName" class="text-2xl font-bold text-blue-400 truncate mb-1">Team A</h3>
+          <div id="scoreA" class="text-8xl font-black text-slate-100 my-4 select-none">0</div>
+        </div>
+        <div class="grid grid-cols-2 gap-2 mt-2">
+          <button onclick="triggerStatModal('A', 'Goal')" class="bg-blue-600 hover:bg-blue-500 text-white font-bold py-3 rounded-lg transition text-sm flex items-center justify-center gap-1.5 shadow cursor-pointer">
+            <i class="fas fa-plus-circle"></i> + GOAL
+          </button>
+          <button onclick="triggerStatModal('A', 'Block')" class="bg-slate-700 hover:bg-slate-600 text-slate-200 font-semibold py-3 rounded-lg transition text-sm flex items-center justify-center gap-1.5 border border-slate-600 cursor-pointer">
+            <i class="fas fa-shield-alt text-blue-400"></i> + BLOCK
+          </button>
+        </div>
+      </div>
+
+      <div class="bg-[#1e293b] border-t-4 border-rose-500 rounded-xl p-6 shadow-lg flex flex-col justify-between">
+        <div class="text-center">
+          <h3 id="displayTeamBName" class="text-2xl font-bold text-rose-400 truncate mb-1">Team B</h3>
+          <div id="scoreB" class="text-8xl font-black text-slate-100 my-4 select-none">0</div>
+        </div>
+        <div class="grid grid-cols-2 gap-2 mt-2">
+          <button onclick="triggerStatModal('B', 'Goal')" class="bg-rose-600 hover:bg-rose-500 text-white font-bold py-3 rounded-lg transition text-sm flex items-center justify-center gap-1.5 shadow cursor-pointer">
+            <i class="fas fa-plus-circle"></i> + GOAL
+          </button>
+          <button onclick="triggerStatModal('B', 'Block')" class="bg-slate-700 hover:bg-slate-600 text-slate-200 font-semibold py-3 rounded-lg transition text-sm flex items-center justify-center gap-1.5 border border-slate-600 cursor-pointer">
+            <i class="fas fa-shield-alt text-rose-400"></i> + BLOCK
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <div class="bg-[#1e293b] border border-slate-700 rounded-xl p-5 shadow-lg">
+      <h4 class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-3 flex items-center gap-2">
+        <i class="fas fa-stream text-cyan-400"></i> Live Action Metric Timeline
+      </h4>
+      <div id="timelineContainer" class="space-y-2 max-h-48 overflow-y-auto pr-2 text-sm"></div>
+    </div>
+  </div>
+
+  <div id="statModal" class="fixed inset-0 bg-black/70 backdrop-blur-sm hidden items-center justify-center z-50 p-4">
+    <div class="bg-[#1e293b] border border-slate-700 rounded-xl max-w-md w-full p-6 shadow-2xl relative">
+      <h3 id="statModalTitle" class="text-xl font-bold text-slate-100 mb-4">Record Performance Action</h3>
+      <div class="space-y-4 mb-6">
+        <div>
+          <label id="playerSelectLabel" class="block text-xs font-semibold text-slate-400 uppercase mb-1.5">Player Name</label>
+          <select id="playerSelect" class="w-full bg-[#0f172a] border border-slate-600 rounded-lg p-2.5 text-slate-200 focus:outline-none focus:border-emerald-500"></select>
+        </div>
+        <div id="assistSelectionWrapper">
+          <label class="block text-xs font-semibold text-slate-400 uppercase mb-1.5">Assisted By</label>
+          <select id="assistSelect" class="w-full bg-[#0f172a] border border-slate-600 rounded-lg p-2.5 text-slate-200 focus:outline-none focus:border-emerald-500"></select>
+        </div>
+      </div>
+      <div class="flex gap-3">
+        <button onclick="closeStatModal()" class="w-1/2 bg-slate-700 hover:bg-slate-600 text-slate-200 font-medium py-2 rounded-lg transition cursor-pointer">Cancel</button>
+        <button onclick="submitStatRecord()" class="w-1/2 bg-emerald-600 hover:bg-emerald-500 text-white font-semibold py-2 rounded-lg transition shadow-md cursor-pointer">Save Stats</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="rosterModal" class="fixed inset-0 bg-black/70 backdrop-blur-sm hidden items-center justify-center z-50 p-4">
+    <div class="bg-[#1e293b] border border-slate-700 rounded-xl max-w-md w-full p-6 shadow-2xl relative">
+      <h3 id="rosterModalTitle" class="text-xl font-bold text-slate-100 mb-2">Roster Roster</h3>
+      <p class="text-xs text-slate-400 mb-4">Review registered squad members configuration.</p>
+      <div id="rosterModalList" class="space-y-2 max-h-64 overflow-y-auto mb-6 bg-[#0f172a] p-3 rounded-lg border border-slate-800"></div>
+      <button onclick="closeRosterModal()" class="w-full bg-slate-700 hover:bg-slate-600 text-slate-200 font-medium py-2.5 rounded-lg transition cursor-pointer">Close</button>
+    </div>
+  </div>
+
+  <div id="historyModal" class="fixed inset-0 bg-black/70 backdrop-blur-sm hidden items-center justify-center z-50 p-4">
+    <div class="bg-[#1e293b] border border-slate-700 rounded-2xl max-w-3xl w-full p-6 shadow-2xl flex flex-col max-h-[85vh]">
+      <div class="flex items-center justify-between mb-4 border-b border-slate-700 pb-3">
+        <h3 class="text-xl font-bold text-slate-100 flex items-center gap-2">
+          <i class="fas fa-history text-cyan-400"></i> Match Statistics Registry History
+        </h3>
+        <button onclick="closeHistoryModal()" class="text-slate-400 hover:text-white transition text-xl cursor-pointer"><i class="fas fa-times"></i></button>
+      </div>
+      
+      <div class="overflow-auto flex-1 rounded-lg border border-slate-800 bg-[#0f172a]">
+        <table class="w-full text-left border-collapse">
+          <thead>
+            <tr class="bg-slate-800 text-slate-300 text-xs uppercase tracking-wider font-semibold border-b border-slate-700">
+              <th class="p-3">Match</th>
+              <th class="p-3">Home Team</th>
+              <th class="p-3 text-center">Score</th>
+              <th class="p-3">Away Team</th>
+              <th class="p-3">Action Stream Overview Summary</th>
+            </tr>
+          </thead>
+          <tbody id="historyTableBody" class="text-sm divide-y divide-slate-800 text-slate-300"></tbody>
+        </table>
+      </div>
+
+      <div class="mt-4 pt-3 border-t border-slate-700 flex justify-between">
+        <button onclick="clearAllStoredData()" class="bg-rose-900/40 hover:bg-rose-900 text-rose-300 border border-rose-700/60 font-medium px-4 py-2 rounded-lg text-sm transition cursor-pointer">
+          <i class="fas fa-trash-alt mr-1"></i> Factory Wipe Data
+        </button>
+        <button onclick="closeHistoryModal()" class="bg-slate-700 hover:bg-slate-600 text-slate-200 px-5 py-2 rounded-lg text-sm font-medium transition cursor-pointer">Close Registry</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    let configuration = { teams: {}, matchMinutes: 25, totalMatches: 3 };
+    let activeBout = { teamAKey: "", teamBKey: "", matchLabel: "Game 1", scoreA: 0, scoreB: 0, timeline: [] };
+    let globalHistoricalRegistry = []; 
+    
+    let clockTickerInterval = null;
+    let clockState = { isRunning: false, msRemainingWhenPaused: 1500 * 1000, expirationTimestamp: null, activePage: 'setupPage' };
+
+    let targetActiveSide = null; 
+    let currentModalStatType = 'Goal'; 
+    let workingTeamsCount = 2;
+
+    window.addEventListener('DOMContentLoaded', () => {
+      loadStateFromStorage();
+      buildTeamUIContainer();
+      clockTickerInterval = setInterval(synchronizedClockTick, 200);
+      routeToSavedPageContext();
+    });
+
+    function saveStateToStorage() {
+      localStorage.setItem('scorekeeper_config', JSON.stringify(configuration));
+      localStorage.setItem('scorekeeper_activeBout', JSON.stringify(activeBout));
+      localStorage.setItem('scorekeeper_history', JSON.stringify(globalHistoricalRegistry));
+      localStorage.setItem('scorekeeper_clockState', JSON.stringify(clockState));
+    }
+
+    function loadStateFromStorage() {
+      const storedConfig = localStorage.getItem('scorekeeper_config');
+      const storedBout = localStorage.getItem('scorekeeper_activeBout');
+      const storedHistory = localStorage.getItem('scorekeeper_history');
+      const storedClock = localStorage.getItem('scorekeeper_clockState');
+
+      if (storedConfig) {
+        configuration = JSON.parse(storedConfig);
+        document.getElementById('matchMinutes').value = configuration.matchMinutes;
+        document.getElementById('totalMatches').value = configuration.totalMatches;
+        workingTeamsCount = Object.keys(configuration.teams).length || 2;
+        document.getElementById('numTeamsInput').value = workingTeamsCount;
+        if (Object.keys(configuration.teams).length > 0) enableDecideGame(true);
+      }
+      if (storedBout) activeBout = JSON.parse(storedBout);
+      if (storedHistory) globalHistoricalRegistry = JSON.parse(storedHistory);
+      if (storedClock) clockState = JSON.parse(storedClock);
+    }
+
+    function routeToSavedPageContext() {
+      document.getElementById('setupPage').classList.add('hidden');
+      document.getElementById('matchupPage').classList.add('hidden');
+      document.getElementById('trackerPage').classList.add('hidden');
+
+      if (clockState.activePage === 'trackerPage' && activeBout.teamAKey) {
+        hydrateTrackerUI();
+        document.getElementById('trackerPage').classList.remove('hidden');
+      } else if (clockState.activePage === 'matchupPage') {
+        goToMatchupSelection();
+      } else {
+        clockState.activePage = 'setupPage';
+        document.getElementById('setupPage').classList.remove('hidden');
+      }
+    }
+
+    function clearAllStoredData() {
+      if (confirm("Wipe all localized historical registry tables and system cache states clear?")) {
+        localStorage.clear();
+        location.reload();
+      }
+    }
+
+    // -----------------------------------------------------------------
+    // PHASE 1: CONFIGURATION ROSTER ENGINE
+    // -----------------------------------------------------------------
+    function changeTeamCount() {
+      workingTeamsCount = parseInt(document.getElementById('numTeamsInput').value) || 2;
+      buildTeamUIContainer();
+      enableDecideGame(false);
+    }
+
+    function buildTeamUIContainer() {
+      const container = document.getElementById('teamsContainer');
+      container.innerHTML = '';
+      const existingTeamKeys = Object.keys(configuration.teams);
+
+      for (let i = 1; i <= workingTeamsCount; i++) {
+        const fallbackName = existingTeamKeys[i - 1] || `Team ${String.fromCharCode(64 + i)}`;
+        if (!configuration.teams[fallbackName]) configuration.teams[fallbackName] = [];
+
+        const card = document.createElement('div');
+        card.className = "bg-[#1e293b] p-5 rounded-xl border border-slate-700 shadow-md space-y-4 relative overflow-hidden";
+        card.innerHTML = `
+          <div class="absolute left-0 top-0 bottom-0 w-1 bg-gradient-to-b from-cyan-500 to-blue-600"></div>
+          <div class="flex flex-col md:flex-row gap-4 items-start md:items-center justify-between pb-3 border-b border-slate-700/50">
+            <div class="w-full md:w-1/2">
+              <label class="block text-xs font-bold text-slate-400 uppercase tracking-wide mb-1">Team ${i} Name Profile</label>
+              <input type="text" id="teamName_${i}" class="team-name-field w-full bg-[#0f172a] border border-slate-600 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-cyan-500 text-slate-200 font-semibold" value="${fallbackName}">
+            </div>
+            <div class="flex items-center gap-2 mt-4 md:mt-0">
+              <button onclick="displayRosterOverview(${i})" class="bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-300 text-xs px-3 py-2 rounded-lg font-medium transition flex items-center gap-1.5 cursor-pointer">
+                <i class="fas fa-users text-cyan-400"></i> Roster (<span id="rosterCountLabel_${i}">0</span>)
+              </button>
+            </div>
+          </div>
+          <div class="bg-[#0f172a]/40 p-3 rounded-lg border border-slate-800/80 flex gap-2 items-center">
+            <input type="text" id="memberIn_${i}" placeholder="Type unique player name label..." class="w-full bg-[#0f172a] border border-slate-700 rounded-lg px-3 py-1.5 text-xs text-slate-300 focus:outline-none focus:border-emerald-500">
+            <button onclick="appendPlayerItemToList(${i})" class="bg-emerald-600 hover:bg-emerald-500 text-white p-2 rounded-lg text-xs font-bold aspect-square flex items-center justify-center transition shadow cursor-pointer"><i class="fas fa-plus"></i></button>
+            <button onclick="triggerRosterDeletionLayout(${i})" class="bg-rose-900/30 hover:bg-rose-900/60 border border-rose-800/50 text-rose-400 p-2 rounded-lg text-xs font-bold aspect-square flex items-center justify-center transition cursor-pointer"><i class="fas fa-minus"></i></button>
+          </div>
+        `;
+        container.appendChild(card);
+        updateRosterCounterDisplayBadge(i);
+      }
+    }
+
+    function updateRosterCounterDisplayBadge(teamIndex) {
+      const nameInput = document.getElementById(`teamName_${teamIndex}`);
+      if (!nameInput) return;
+      const currentKey = nameInput.value.trim();
+      const players = configuration.teams[currentKey] || [];
+      const label = document.getElementById(`rosterCountLabel_${teamIndex}`);
+      if (label) label.innerText = players.length;
+    }
+
+    function appendPlayerItemToList(teamIndex) {
+      const nameInput = document.getElementById(`teamName_${teamIndex}`);
+      const memberInput = document.getElementById(`memberIn_${teamIndex}`);
+      const teamKey = nameInput.value.trim();
+      const playerVal = memberInput.value.trim();
+
+      if (!teamKey) return alert("Initialize Team Name profile parameters prior to assignment.");
+      if (!playerVal) return;
+
+      if (!configuration.teams[teamKey]) configuration.teams[teamKey] = [];
+      if (configuration.teams[teamKey].includes(playerVal)) return alert("Specified registration target already exists on squad.");
+
+      configuration.teams[teamKey].push(playerVal);
+      memberInput.value = '';
+      updateRosterCounterDisplayBadge(teamIndex);
+      saveStateToStorage();
+    }
+
+    function displayRosterOverview(teamIndex) {
+      const nameInput = document.getElementById(`teamName_${teamIndex}`);
+      const teamKey = nameInput.value.trim();
+      const listContainer = document.getElementById('rosterModalList');
+      document.getElementById('rosterModalTitle').innerText = `${teamKey || 'Unset'} Squad configuration`;
+      listContainer.innerHTML = '';
+
+      const players = configuration.teams[teamKey] || [];
+      if (players.length === 0) {
+        listContainer.innerHTML = `<p class="text-slate-500 italic text-center py-4 text-xs">No personnel elements defined.</p>`;
+      } else {
+        players.forEach(p => {
+          const block = document.createElement('div');
+          block.className = "text-slate-300 text-xs py-1.5 border-b border-slate-800/60 last:border-0";
+          block.innerHTML = `<span><i class="fas fa-user text-slate-500 mr-2"></i>${p}</span>`;
+          listContainer.appendChild(block);
         });
+      }
+      document.getElementById('rosterModal').className = "fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-50 p-4";
+    }
+
+    function triggerRosterDeletionLayout(teamIndex) {
+      const nameInput = document.getElementById(`teamName_${teamIndex}`);
+      const teamKey = nameInput.value.trim();
+      const listContainer = document.getElementById('rosterModalList');
+      document.getElementById('rosterModalTitle').innerText = `Prune: ${teamKey}`;
+      listContainer.innerHTML = '';
+
+      const players = configuration.teams[teamKey] || [];
+      if (players.length === 0) {
+        listContainer.innerHTML = `<p class="text-slate-500 italic text-center py-4 text-xs">Roster is empty.</p>`;
+      } else {
+        players.forEach((p, idx) => {
+          const block = document.createElement('div');
+          block.className = "flex items-center justify-between text-slate-300 text-xs p-1.5 bg-slate-900/50 rounded border border-slate-800";
+          block.innerHTML = `
+            <span><i class="fas fa-user text-slate-500 mr-2"></i>${p}</span>
+            <button onclick="deleteSingleRosterMember('${teamKey}', ${idx}, ${teamIndex})" class="bg-rose-950 hover:bg-rose-900 border border-rose-800 text-rose-300 text-[10px] px-2 py-1 rounded transition cursor-pointer">Delete</button>
+          `;
+          listContainer.appendChild(block);
+        });
+      }
+      document.getElementById('rosterModal').className = "fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-50 p-4";
+    }
+
+    function deleteSingleRosterMember(teamKey, playerIndex, originalTeamIndex) {
+      if (configuration.teams[teamKey]) {
+        configuration.teams[teamKey].splice(playerIndex, 1);
+        saveStateToStorage();
+        updateRosterCounterDisplayBadge(originalTeamIndex);
+        triggerRosterDeletionLayout(originalTeamIndex);
+      }
+    }
+
+    function closeRosterModal() { document.getElementById('rosterModal').className = "hidden"; }
+
+    function lockAndConfirmTeams() {
+      const nameFields = document.querySelectorAll('.team-name-field');
+      const synchronizedTeamsObj = {};
+      configuration.matchMinutes = parseInt(document.getElementById('matchMinutes').value) || 25;
+      configuration.totalMatches = parseInt(document.getElementById('totalMatches').value) || 3;
+
+      let valid = true;
+      nameFields.forEach((input, index) => {
+        const name = input.value.trim();
+        if (!name) { valid = false; input.classList.add('border-rose-500'); }
+        else {
+          input.classList.remove('border-rose-500');
+          const lookupOldKey = Object.keys(configuration.teams)[index] || name;
+          synchronizedTeamsObj[name] = configuration.teams[lookupOldKey] || configuration.teams[name] || [];
+          if (synchronizedTeamsObj[name].length === 0) synchronizedTeamsObj[name].push("Solo Player");
+        }
+      });
+
+      if (!valid) return alert("Ensure all structural squad components carry designated alphanumeric labels.");
+      configuration.teams = synchronizedTeamsObj;
+      saveStateToStorage();
+      enableDecideGame(true);
+      alert("All parameters localized successfully. Match selection engine active.");
+    }
+
+    function enableDecideGame(status) {
+      const btn = document.getElementById('decideGameBtn');
+      const warning = document.getElementById('lockWarning');
+      if (status) {
+        btn.disabled = false;
+        btn.className = "w-full bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500 text-white font-bold py-3 rounded-lg transition shadow-md flex items-center justify-center gap-2 cursor-pointer";
+        warning.innerHTML = "<i class='fas fa-check-circle mr-1'></i> Settings locked.";
+        warning.className = "text-xs text-emerald-400 text-center mt-2 font-medium";
+      } else {
+        btn.disabled = true;
+        btn.className = "w-full bg-slate-600 text-slate-400 font-bold py-3 rounded-lg transition flex items-center justify-center gap-2 cursor-not-allowed";
+        warning.innerHTML = "<i class='fas fa-info-circle mr-1'></i> Lock configurations to initialize fixtures.";
+        warning.className = "text-xs text-amber-400/80 text-center mt-2";
+      }
+    }
+
+    // -----------------------------------------------------------------
+    // PHASE 2: FIXTURE MATRIX TRACKING
+    // -----------------------------------------------------------------
+    function goToMatchupSelection() {
+      clockState.activePage = 'matchupPage';
+      saveStateToStorage();
+      document.getElementById('setupPage').classList.add('hidden');
+      document.getElementById('matchupPage').classList.remove('hidden');
+
+      const selectA = document.getElementById('selectTeamA');
+      const selectB = document.getElementById('selectTeamB');
+      const selectMatch = document.getElementById('selectMatchNumber');
+
+      selectA.innerHTML = ''; selectB.innerHTML = ''; selectMatch.innerHTML = '';
+      const teamKeys = Object.keys(configuration.teams);
+
+      teamKeys.forEach((team, idx) => {
+        selectA.add(new Option(team, team));
+        const optB = new Option(team, team);
+        if (idx === 1) optB.selected = true;
+        selectB.add(optB);
+      });
+
+      const totalRounds = parseInt(document.getElementById('totalMatches').value) || 3;
+      for (let r = 1; r <= totalRounds; r++) {
+        selectMatch.add(new Option(`Game ${r}`, `Game ${r}`));
+      }
+    }
+
+    function backToSetup() {
+      clockState.activePage = 'setupPage';
+      saveStateToStorage();
+      document.getElementById('matchupPage').classList.add('hidden');
+      document.getElementById('setupPage').classList.remove('hidden');
+    }
+
+    function launchLiveMatch() {
+      const teamA = document.getElementById('selectTeamA').value;
+      const teamB = document.getElementById('selectTeamB').value;
+      const matchLabel = document.getElementById('selectMatchNumber').value;
+
+      if (teamA === teamB) return alert("A match requires two distinct team identities. Select different pairings.");
+
+      const preExistingMatch = globalHistoricalRegistry.find(m => m.matchLabel === matchLabel);
+      if (preExistingMatch && !confirm(`Historical performance entry logs for ${matchLabel} already exist. Overwrite file mapping elements?`)) return;
+      if (preExistingMatch) globalHistoricalRegistry = globalHistoricalRegistry.filter(m => m.matchLabel !== matchLabel);
+
+      activeBout = { teamAKey: teamA, teamBKey: teamB, matchLabel: matchLabel, scoreA: 0, scoreB: 0, timeline: [] };
+      
+      // --- FIXED: Explicitly sync configurations configuration array state directly on launch ---
+      configuration.matchMinutes = parseInt(document.getElementById('matchMinutes').value) || 25;
+      
+      clockState.isRunning = false;
+      clockState.msRemainingWhenPaused = configuration.matchMinutes * 60 * 1000;
+      clockState.expirationTimestamp = null;
+      clockState.activePage = 'trackerPage';
+
+      saveStateToStorage();
+      hydrateTrackerUI();
+      document.getElementById('matchupPage').classList.add('hidden');
+      document.getElementById('trackerPage').classList.remove('hidden');
+    }
+
+    // -----------------------------------------------------------------
+    // PHASE 3: METRIC SYSTEM COUNTERS
+    // -----------------------------------------------------------------
+    function backToMatchup() {
+      commitActiveBoutToHistory();
+      clockState.activePage = 'matchupPage';
+      saveStateToStorage();
+      document.getElementById('trackerPage').classList.add('hidden');
+      document.getElementById('matchupPage').classList.remove('hidden');
+    }
+
+    function hydrateTrackerUI() {
+      document.getElementById('matchLabelDisplay').innerText = activeBout.matchLabel;
+      document.getElementById('displayTeamAName').innerText = activeBout.teamAKey;
+      document.getElementById('displayTeamBName').innerText = activeBout.teamBKey;
+      document.getElementById('scoreA').innerText = activeBout.scoreA;
+      document.getElementById('scoreB').innerText = activeBout.scoreB;
+      renderTimelineDOM();
+      refreshUIClockDisplayStrings();
+    }
+
+    function calculateMsRemaining() {
+      if (!clockState.isRunning) return clockState.msRemainingWhenPaused;
+      return Math.max(0, clockState.expirationTimestamp - Date.now());
+    }
+
+    function refreshUIClockDisplayStrings() {
+      const msLeft = calculateMsRemaining();
+      const totalSecondsLeft = Math.ceil(msLeft / 1000);
+      const mins = Math.floor(totalSecondsLeft / 60);
+      const secs = totalSecondsLeft % 60;
+      
+      document.getElementById('timerDisplay').innerText = `${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
+      const runBtn = document.getElementById('startStopBtn');
+      if (clockState.isRunning) {
+        runBtn.innerText = "Stop";
+        runBtn.className = "bg-rose-500 hover:bg-rose-400 text-white font-bold px-6 py-2 rounded-lg shadow-md transition uppercase tracking-wider text-sm cursor-pointer";
+      } else {
+        runBtn.innerText = "Start";
+        runBtn.className = "bg-emerald-500 hover:bg-emerald-400 text-[#0f172a] font-bold px-6 py-2 rounded-lg shadow-md transition uppercase tracking-wider text-sm cursor-pointer";
+      }
+    }
+
+    function synchronizedClockTick() {
+      if (clockState.activePage === 'trackerPage') {
+        refreshUIClockDisplayStrings();
+        if (clockState.isRunning && Date.now() >= clockState.expirationTimestamp) {
+          clockState.isRunning = false;
+          clockState.msRemainingWhenPaused = 0;
+          clockState.expirationTimestamp = null;
+          saveStateToStorage();
+          alert(`Regulation play window expired for active assignment: ${activeBout.matchLabel}`);
+          hydrateTrackerUI();
+        }
+      }
+    }
+
+    function toggleTimer() {
+      if (clockState.isRunning) {
+        clockState.msRemainingWhenPaused = Math.max(0, clockState.expirationTimestamp - Date.now());
+        clockState.isRunning = false;
+        clockState.expirationTimestamp = null;
+      } else {
+        if (clockState.msRemainingWhenPaused <= 0) clockState.msRemainingWhenPaused = configuration.matchMinutes * 60 * 1000;
+        clockState.expirationTimestamp = Date.now() + clockState.msRemainingWhenPaused;
+        clockState.isRunning = true;
+      }
+      saveStateToStorage();
+      refreshUIClockDisplayStrings();
+    }
+
+    function resetTimer() {
+      clockState.isRunning = false;
+      clockState.msRemainingWhenPaused = configuration.matchMinutes * 60 * 1000;
+      clockState.expirationTimestamp = null;
+      saveStateToStorage();
+      refreshUIClockDisplayStrings();
+    }
+
+    // -----------------------------------------------------------------
+    // LOG MODAL INTERACTION CONTROLLERS
+    // -----------------------------------------------------------------
+    function triggerStatModal(side, statType) {
+      targetActiveSide = side; 
+      currentModalStatType = statType;
+      
+      const targetTeamKey = (side === 'A') ? activeBout.teamAKey : activeBout.teamBKey;
+      document.getElementById('statModalTitle').innerText = `Log ${statType}: ${targetTeamKey}`;
+      document.getElementById('playerSelectLabel').innerText = `${statType} Player Name`;
+
+      const pSelect = document.getElementById('playerSelect');
+      const aSelect = document.getElementById('assistSelect');
+      const assistWrapper = document.getElementById('assistSelectionWrapper');
+
+      pSelect.innerHTML = ''; aSelect.innerHTML = '';
+
+      const roster = configuration.teams[targetTeamKey] || [];
+      const safeRoster = roster.length > 0 ? roster : ["Solo Player"];
+
+      safeRoster.forEach(p => {
+        pSelect.add(new Option(p, p));
+        aSelect.add(new Option(p, p));
+      });
+
+      if (statType === 'Goal') {
+        assistWrapper.classList.remove('hidden');
+        const nullOpt = new Option("Unassisted", "Unassisted");
+        nullOpt.selected = true;
+        aSelect.insertBefore(nullOpt, aSelect.firstChild);
+      } else {
+        assistWrapper.classList.add('hidden');
+      }
+
+      document.getElementById('statModal').className = "fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-50 p-4";
+    }
+
+    function closeStatModal() { document.getElementById('statModal').className = "hidden"; }
+
+    function submitStatRecord() {
+      const player = document.getElementById('playerSelect').value;
+      const assist = document.getElementById('assistSelect').value;
+      
+      const msSpent = (configuration.matchMinutes * 60 * 1000) - calculateMsRemaining();
+      const currentMinutes = Math.floor(msSpent / 60000);
+      const timestampString = `${currentMinutes}'`;
+      const currentTeamKey = (targetActiveSide === 'A') ? activeBout.teamAKey : activeBout.teamBKey;
+
+      let logText = "";
+      if (currentModalStatType === 'Goal') {
+        if (targetActiveSide === 'A') activeBout.scoreA++; else activeBout.scoreB++;
+        logText = `⚽ Goal by <strong>${player}</strong>${assist !== "Unassisted" ? ' (Assist: ' + assist + ')' : ''}`;
+      } else {
+        logText = `🛡️ Defensive Block by <strong>${player}</strong>`;
+      }
+
+      const themedTeamLabel = `<span class="${targetActiveSide === 'A' ? 'text-blue-400' : 'text-rose-400'} font-semibold">[${currentTeamKey}]</span> `;
+      logText = themedTeamLabel + logText;
+
+      activeBout.timeline.unshift({
+        time: timestampString,
+        text: logText,
+        team: currentTeamKey,
+        type: currentModalStatType,
+        player: player,
+        assist: (currentModalStatType === 'Goal' && assist !== "Unassisted") ? assist : ""
+      });
+
+      saveStateToStorage();
+      hydrateTrackerUI();
+      closeStatModal();
+    }
+
+    function renderTimelineDOM() {
+      const container = document.getElementById('timelineContainer');
+      container.innerHTML = '';
+      if (activeBout.timeline.length === 0) {
+        container.innerHTML = `<p class="text-slate-500 italic text-center py-4">No performance statistics registered down the timeline loop.</p>`;
+        return;
+      }
+      activeBout.timeline.forEach(evt => {
+        const row = document.createElement('div');
+        row.className = "flex items-start gap-3 bg-[#0f172a]/60 p-2.5 rounded border border-slate-800";
+        row.innerHTML = `
+          <span class="bg-slate-800 border border-slate-700 px-2 py-0.5 rounded text-xs text-cyan-400 font-mono font-bold">${evt.time}</span>
+          <div class="text-slate-200 text-sm leading-relaxed">${evt.text}</div>
+        `;
+        container.appendChild(row);
       });
     }
-  });
-  
-  const detailingSheet = XLSX.utils.json_to_sheet(performanceLogs);
-  XLSX.utils.book_append_sheet(workbook, detailingSheet, "Live Actions Log Matrix");
-  XLSX.writeFile(workbook, `Tournament_Performance_Registry.xlsx`);
-}
+
+    function commitActiveBoutToHistory() {
+      if (!activeBout.teamAKey) return;
+      globalHistoricalRegistry = globalHistoricalRegistry.filter(m => m.matchLabel !== activeBout.matchLabel);
+      globalHistoricalRegistry.push(JSON.parse(JSON.stringify(activeBout)));
+      globalHistoricalRegistry.sort((a, b) => a.matchLabel.localeCompare(b.matchLabel));
+      saveStateToStorage();
+    }
+
+    function openHistoryModal() {
+      commitActiveBoutToHistory();
+      const tbody = document.getElementById('historyTableBody');
+      tbody.innerHTML = '';
+
+      if (globalHistoricalRegistry.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="5" class="p-8 text-center text-slate-500 italic">No historical matches saved.</td></tr>`;
+      } else {
+        globalHistoricalRegistry.forEach(m => {
+          let summary = m.timeline.map(t => `[${t.time}] ${t.type}: ${t.player}${t.assist ? ' (Asst: '+t.assist+')' : ''}`).join(', ');
+          if (!summary) summary = "No entries logged.";
+
+          const tr = document.createElement('tr');
+          tr.className = "hover:bg-slate-800/40 transition border-b border-slate-800/60";
+          tr.innerHTML = `
+            <td class="p-3 font-semibold text-cyan-400 whitespace-nowrap">${m.matchLabel}</td>
+            <td class="p-3 text-blue-400 font-medium">${m.teamAKey}</td>
+            <td class="p-3 font-mono font-bold text-center text-base bg-slate-900/40">${m.scoreA} - ${m.scoreB}</td>
+            <td class="p-3 text-rose-400 font-medium">${m.teamBKey}</td>
+            <td class="p-3 text-xs text-slate-400 max-w-xs truncate" title="${summary}">${summary}</td>
+          `;
+          tbody.appendChild(tr);
+        });
+      }
+      document.getElementById('historyModal').className = "fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-50 p-4";
+    }
+
+    function closeHistoryModal() { document.getElementById('historyModal').className = "hidden"; }
+
+    // -----------------------------------------------------------------
+    // REAL-TIME ACTIONS EXCEL BUILDER SPREADSHEET ENGINE
+    // -----------------------------------------------------------------
+    function exportToExcel() {
+      commitActiveBoutToHistory();
+      if (globalHistoricalRegistry.length === 0) return alert("Historical data arrays are empty. Perform logging sequence before export processing.");
+      
+      const workbook = XLSX.utils.book_new();
+      
+      // TAB ONE: GENERAL TOURNAMENT ROUNDS OVERVIEW SUMMARY
+      const summaryDataMatrix = globalHistoricalRegistry.map(m => ({
+        "Match Number": m.matchLabel,
+        "Home Team (A)": m.teamAKey,
+        "Home Score": m.scoreA,
+        "Away Score": m.scoreB,
+        "Away Team (B)": m.teamBKey,
+        "Total Live Actions Logged": m.timeline.length
+      }));
+      const summarySheet = XLSX.utils.json_to_sheet(summaryDataMatrix);
+      XLSX.utils.book_append_sheet(workbook, summarySheet, "Tournament Overview");
+      
+      // TAB TWO: DETAILED PERFORMANCE ACTIONS (DEDICATED STATS TRACKING)
+      const performanceLogs = [];
+      globalHistoricalRegistry.forEach(m => {
+        if (m.timeline.length === 0) {
+          performanceLogs.push({
+            "Match Instance": m.matchLabel,
+            "Timestamp Reference": "N/A",
+            "Affiliated Team": "N/A",
+            "Event Action Type": "No Performance Tracked",
+            "Player Name / Scorer": "N/A",
+            "Assist Credit": "N/A"
+          });
+        } else {
+          // Parse events chronologically from game opening kickoff forward
+          [...m.timeline].reverse().forEach(t => {
+            performanceLogs.push({
+              "Match Instance": m.matchLabel,
+              "Timestamp Reference": t.time,
+              "Affiliated Team": t.team,
+              "Event Action Type": t.type ? t.type.toUpperCase() : "GOAL",
+              "Player Name / Scorer": t.player,
+              "Assist Credit": t.type === "Goal" ? (t.assist || "Unassisted") : "N/A"
+            });
+          });
+        }
+      });
+      
+      const detailingSheet = XLSX.utils.json_to_sheet(performanceLogs);
+      XLSX.utils.book_append_sheet(workbook, detailingSheet, "Live Actions Log Matrix");
+      XLSX.writeFile(workbook, `Tournament_Performance_Registry.xlsx`);
+    }
+  </script>
+</body>
+</html>
