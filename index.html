@@ -15,37 +15,43 @@
       <i class="fas fa-trophy text-amber-400"></i> <span>ScoreKeeper Pro</span>
     </div>
     <div class="flex items-center gap-3">
+      <!-- Language Toggle -->
+      <div class="flex items-center bg-slate-900 border border-slate-700 rounded-lg overflow-hidden text-xs font-semibold">
+        <button id="langBtn_en" onclick="setLanguage('en')" class="px-3 py-2 transition cursor-pointer">EN</button>
+        <button id="langBtn_ja" onclick="setLanguage('ja')" class="px-3 py-2 transition cursor-pointer">日本語</button>
+        <button id="langBtn_zh" onclick="setLanguage('zh')" class="px-3 py-2 transition cursor-pointer">中文</button>
+      </div>
       <button onclick="openHistoryModal()" class="bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-200 px-4 py-2 rounded-lg text-sm font-medium transition flex items-center gap-2 cursor-pointer">
-        <i class="fas fa-database text-cyan-400"></i> View Data
+        <i class="fas fa-database text-cyan-400"></i> <span data-i18n="navViewData">View Data</span>
       </button>
       <button onclick="exportToExcel()" class="bg-emerald-600 hover:bg-emerald-500 text-white px-4 py-2 rounded-lg text-sm font-medium transition shadow-md flex items-center gap-2 cursor-pointer">
-        <i class="fas fa-file-excel"></i> Download Excel
+        <i class="fas fa-file-excel"></i> <span data-i18n="navDownload">Download Excel</span>
       </button>
     </div>
   </nav>
 
   <div id="setupPage" class="max-w-4xl mx-auto px-4 py-8">
     <header class="text-center mb-8">
-      <h1 class="text-4xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 to-cyan-400 mb-2">
+      <h1 class="text-4xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 to-cyan-400 mb-2" data-i18n="setupTitle">
         Tournament Configuration
       </h1>
-      <p class="text-slate-400">Configure your teams, players, and match settings.</p>
+      <p class="text-slate-400" data-i18n="setupSubtitle">Configure your teams, players, and match settings.</p>
     </header>
 
     <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
       <div class="md:col-span-2 space-y-6">
         <div class="bg-[#1e293b] p-6 rounded-xl border border-slate-700 shadow-xl">
           <h2 class="text-lg font-semibold mb-4 text-emerald-400 flex items-center gap-2">
-            <i class="fas fa-users-cog"></i> 1. Core Settings
+            <i class="fas fa-users-cog"></i> <span data-i18n="coreSettings">1. Core Settings</span>
           </h2>
           <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
-              <label class="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">Number of Teams</label>
+              <label class="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2" data-i18n="numTeams">Number of Teams</label>
               <input type="number" id="numTeamsInput" min="2" max="10" value="2" class="w-full bg-[#0f172a] border border-slate-600 rounded-lg px-4 py-2 focus:outline-none focus:border-emerald-500 transition">
             </div>
             <div class="flex items-end">
               <button onclick="changeTeamCount()" class="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-medium px-4 py-2 rounded-lg transition shadow-md flex items-center justify-center gap-2 cursor-pointer">
-                <i class="fas fa-sync"></i> Update Layout
+                <i class="fas fa-sync"></i> <span data-i18n="updateLayout">Update Layout</span>
               </button>
             </div>
           </div>
@@ -55,7 +61,7 @@
         
         <div class="text-right">
           <button onclick="lockAndConfirmTeams()" class="bg-cyan-600 hover:bg-cyan-500 text-white font-semibold px-6 py-3 rounded-lg transition shadow-lg flex items-center gap-2 ml-auto cursor-pointer">
-            <i class="fas fa-lock"></i> Confirm & Lock Teams
+            <i class="fas fa-lock"></i> <span data-i18n="confirmLock">Confirm & Lock Teams</span>
           </button>
         </div>
       </div>
@@ -63,28 +69,28 @@
       <div class="space-y-6">
         <div class="bg-[#1e293b] p-6 rounded-xl border border-slate-700 shadow-xl sticky top-24">
           <h2 class="text-lg font-semibold mb-4 text-cyan-400 flex items-center gap-2">
-            <i class="fas fa-sliders-h"></i> 2. Game Settings
+            <i class="fas fa-sliders-h"></i> <span data-i18n="gameSettings">2. Game Settings</span>
           </h2>
           
           <div class="space-y-4 mb-6">
             <div>
-              <label class="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">Match Duration</label>
+              <label class="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2" data-i18n="matchDuration">Match Duration</label>
               <div class="flex items-center gap-2">
                 <input type="number" id="matchMinutes" min="1" max="90" value="25" class="w-full bg-[#0f172a] border border-slate-600 rounded-lg px-3 py-2 text-center focus:outline-none focus:border-cyan-500">
-                <span class="text-sm text-slate-400">mins</span>
+                <span class="text-sm text-slate-400" data-i18n="mins">mins</span>
               </div>
             </div>
             <div>
-              <label class="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">Total Matches Planned</label>
+              <label class="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2" data-i18n="totalMatchesLabel">Total Matches Planned</label>
               <input type="number" id="totalMatches" min="1" max="20" value="3" class="w-full bg-[#0f172a] border border-slate-600 rounded-lg px-3 py-2 text-center focus:outline-none focus:border-cyan-500">
             </div>
           </div>
 
           <button onclick="goToMatchupSelection()" id="decideGameBtn" disabled class="w-full bg-slate-600 text-slate-400 font-bold py-3 rounded-lg transition flex items-center justify-center gap-2 cursor-not-allowed">
-            <i class="fas fa-calendar-alt"></i> Decide Game
+            <i class="fas fa-calendar-alt"></i> <span data-i18n="decideGame">Decide Game</span>
           </button>
           <p id="lockWarning" class="text-xs text-amber-400/80 text-center mt-2">
-            <i class="fas fa-info-circle mr-1"></i> Lock configurations to initialize fixtures.
+            <i class="fas fa-info-circle mr-1"></i> <span data-i18n="lockWarning">Lock configurations to initialize fixtures.</span>
           </p>
         </div>
       </div>
@@ -93,32 +99,32 @@
 
   <div id="matchupPage" class="max-w-2xl mx-auto px-4 py-12 hidden">
     <div class="bg-[#1e293b] p-8 rounded-2xl border border-slate-700 shadow-2xl text-center">
-      <h2 class="text-2xl font-bold text-cyan-400 mb-1">Fixture Dashboard</h2>
-      <p class="text-slate-400 text-sm mb-8">Set up the pairings for the upcoming round.</p>
+      <h2 class="text-2xl font-bold text-cyan-400 mb-1" data-i18n="fixtureDashboard">Fixture Dashboard</h2>
+      <p class="text-slate-400 text-sm mb-8" data-i18n="fixtureSubtitle">Set up the pairings for the upcoming round.</p>
 
       <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 items-center mb-8">
         <div class="bg-[#0f172a] p-4 rounded-xl border border-slate-700">
-          <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Home Team (A)</label>
+          <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2" data-i18n="homeTeam">Home Team (A)</label>
           <select id="selectTeamA" class="w-full bg-[#1e293b] border border-slate-600 rounded-lg p-2 text-center text-blue-400 font-semibold focus:outline-none"></select>
         </div>
         <div class="text-xl font-bold text-slate-500 uppercase tracking-widest py-2">vs</div>
         <div class="bg-[#0f172a] p-4 rounded-xl border border-slate-700">
-          <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Away Team (B)</label>
+          <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2" data-i18n="awayTeam">Away Team (B)</label>
           <select id="selectTeamB" class="w-full bg-[#1e293b] border border-slate-600 rounded-lg p-2 text-center text-rose-400 font-semibold focus:outline-none"></select>
         </div>
       </div>
 
       <div class="w-32 mx-auto mb-8">
-        <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Round Slot</label>
+        <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2" data-i18n="roundSlot">Round Slot</label>
         <select id="selectMatchNumber" class="w-full bg-[#0f172a] border border-slate-600 rounded-lg p-2 text-center text-slate-200 focus:outline-none"></select>
       </div>
 
       <div class="flex gap-4">
         <button onclick="backToSetup()" class="w-1/2 bg-slate-700 hover:bg-slate-600 text-white font-semibold py-3 rounded-lg transition flex items-center justify-center gap-2 cursor-pointer">
-          <i class="fas fa-arrow-left"></i> Setup Configuration
+          <i class="fas fa-arrow-left"></i> <span data-i18n="setupConfig">Setup Configuration</span>
         </button>
         <button onclick="launchLiveMatch()" class="w-1/2 bg-gradient-to-r from-emerald-600 to-cyan-600 hover:from-emerald-500 hover:to-cyan-500 text-white font-bold py-3 rounded-lg transition shadow-lg flex items-center justify-center gap-2 cursor-pointer">
-          OK <i class="fas fa-play"></i>
+          <span data-i18n="okBtn">OK</span> <i class="fas fa-play"></i>
         </button>
       </div>
     </div>
@@ -127,7 +133,7 @@
   <div id="trackerPage" class="hidden max-w-4xl mx-auto px-4 py-8 space-y-6">
     <div class="flex items-center justify-between">
       <button onclick="backToMatchup()" class="text-slate-400 hover:text-white transition px-3 py-1.5 rounded-lg border border-slate-700 hover:bg-slate-800 text-sm flex items-center gap-1.5 cursor-pointer">
-        <i class="fas fa-chevron-left"></i> Change Matchup
+        <i class="fas fa-chevron-left"></i> <span data-i18n="changeMatchup">Change Matchup</span>
       </button>
       <div id="matchLabelDisplay" class="bg-cyan-950 text-cyan-400 border border-cyan-800 text-xs font-bold px-3 py-1 rounded-full uppercase tracking-widest">Game 1</div>
     </div>
@@ -135,8 +141,8 @@
     <div class="bg-[#1e293b] border border-slate-700 rounded-2xl p-6 text-center max-w-md mx-auto shadow-xl">
       <div id="timerDisplay" class="text-6xl font-mono font-bold text-slate-100 tracking-wider mb-3 select-none">25:00</div>
       <div class="flex justify-center gap-3">
-        <button id="startStopBtn" onclick="toggleTimer()" class="bg-emerald-500 hover:bg-emerald-400 text-[#0f172a] font-bold px-6 py-2 rounded-lg shadow-md transition uppercase tracking-wider text-sm cursor-pointer">Start</button>
-        <button onclick="resetTimer()" class="bg-slate-700 hover:bg-slate-600 text-slate-300 font-medium px-4 py-2 rounded-lg transition text-sm cursor-pointer">Reset Clock</button>
+        <button id="startStopBtn" onclick="toggleTimer()" class="bg-emerald-500 hover:bg-emerald-400 text-[#0f172a] font-bold px-6 py-2 rounded-lg shadow-md transition uppercase tracking-wider text-sm cursor-pointer" data-i18n="start">Start</button>
+        <button onclick="resetTimer()" class="bg-slate-700 hover:bg-slate-600 text-slate-300 font-medium px-4 py-2 rounded-lg transition text-sm cursor-pointer" data-i18n="resetClock">Reset Clock</button>
       </div>
     </div>
 
@@ -148,10 +154,10 @@
         </div>
         <div class="grid grid-cols-2 gap-2 mt-2">
           <button onclick="triggerStatModal('A', 'Goal')" class="bg-blue-600 hover:bg-blue-500 text-white font-bold py-3 rounded-lg transition text-sm flex items-center justify-center gap-1.5 shadow cursor-pointer">
-            <i class="fas fa-plus-circle"></i> + GOAL
+            <i class="fas fa-plus-circle"></i> + <span data-i18n="goal">GOAL</span>
           </button>
           <button onclick="triggerStatModal('A', 'Block')" class="bg-slate-700 hover:bg-slate-600 text-slate-200 font-semibold py-3 rounded-lg transition text-sm flex items-center justify-center gap-1.5 border border-slate-600 cursor-pointer">
-            <i class="fas fa-shield-alt text-blue-400"></i> + BLOCK
+            <i class="fas fa-shield-alt text-blue-400"></i> + <span data-i18n="block">BLOCK</span>
           </button>
         </div>
       </div>
@@ -163,10 +169,10 @@
         </div>
         <div class="grid grid-cols-2 gap-2 mt-2">
           <button onclick="triggerStatModal('B', 'Goal')" class="bg-rose-600 hover:bg-rose-500 text-white font-bold py-3 rounded-lg transition text-sm flex items-center justify-center gap-1.5 shadow cursor-pointer">
-            <i class="fas fa-plus-circle"></i> + GOAL
+            <i class="fas fa-plus-circle"></i> + <span data-i18n="goal">GOAL</span>
           </button>
           <button onclick="triggerStatModal('B', 'Block')" class="bg-slate-700 hover:bg-slate-600 text-slate-200 font-semibold py-3 rounded-lg transition text-sm flex items-center justify-center gap-1.5 border border-slate-600 cursor-pointer">
-            <i class="fas fa-shield-alt text-rose-400"></i> + BLOCK
+            <i class="fas fa-shield-alt text-rose-400"></i> + <span data-i18n="block">BLOCK</span>
           </button>
         </div>
       </div>
@@ -174,12 +180,13 @@
 
     <div class="bg-[#1e293b] border border-slate-700 rounded-xl p-5 shadow-lg">
       <h4 class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-3 flex items-center gap-2">
-        <i class="fas fa-stream text-cyan-400"></i> Live Action Metric Timeline
+        <i class="fas fa-stream text-cyan-400"></i> <span data-i18n="timeline">Live Action Metric Timeline</span>
       </h4>
       <div id="timelineContainer" class="space-y-2 max-h-48 overflow-y-auto pr-2 text-sm"></div>
     </div>
   </div>
 
+  <!-- Stat Modal -->
   <div id="statModal" class="fixed inset-0 bg-black/70 backdrop-blur-sm hidden items-center justify-center z-50 p-4">
     <div class="bg-[#1e293b] border border-slate-700 rounded-xl max-w-md w-full p-6 shadow-2xl relative">
       <h3 id="statModalTitle" class="text-xl font-bold text-slate-100 mb-4">Record Performance Action</h3>
@@ -189,31 +196,33 @@
           <select id="playerSelect" class="w-full bg-[#0f172a] border border-slate-600 rounded-lg p-2.5 text-slate-200 focus:outline-none focus:border-emerald-500"></select>
         </div>
         <div id="assistSelectionWrapper">
-          <label class="block text-xs font-semibold text-slate-400 uppercase mb-1.5">Assisted By</label>
+          <label class="block text-xs font-semibold text-slate-400 uppercase mb-1.5" data-i18n="assistedBy">Assisted By</label>
           <select id="assistSelect" class="w-full bg-[#0f172a] border border-slate-600 rounded-lg p-2.5 text-slate-200 focus:outline-none focus:border-emerald-500"></select>
         </div>
       </div>
       <div class="flex gap-3">
-        <button onclick="closeStatModal()" class="w-1/2 bg-slate-700 hover:bg-slate-600 text-slate-200 font-medium py-2 rounded-lg transition cursor-pointer">Cancel</button>
-        <button onclick="submitStatRecord()" class="w-1/2 bg-emerald-600 hover:bg-emerald-500 text-white font-semibold py-2 rounded-lg transition shadow-md cursor-pointer">Save Stats</button>
+        <button onclick="closeStatModal()" class="w-1/2 bg-slate-700 hover:bg-slate-600 text-slate-200 font-medium py-2 rounded-lg transition cursor-pointer" data-i18n="cancel">Cancel</button>
+        <button onclick="submitStatRecord()" class="w-1/2 bg-emerald-600 hover:bg-emerald-500 text-white font-semibold py-2 rounded-lg transition shadow-md cursor-pointer" data-i18n="saveStats">Save Stats</button>
       </div>
     </div>
   </div>
 
+  <!-- Roster Modal -->
   <div id="rosterModal" class="fixed inset-0 bg-black/70 backdrop-blur-sm hidden items-center justify-center z-50 p-4">
     <div class="bg-[#1e293b] border border-slate-700 rounded-xl max-w-md w-full p-6 shadow-2xl relative">
-      <h3 id="rosterModalTitle" class="text-xl font-bold text-slate-100 mb-2">Roster Roster</h3>
-      <p class="text-xs text-slate-400 mb-4">Review registered squad members configuration.</p>
+      <h3 id="rosterModalTitle" class="text-xl font-bold text-slate-100 mb-2">Roster</h3>
+      <p class="text-xs text-slate-400 mb-4" data-i18n="rosterSubtitle">Review registered squad members configuration.</p>
       <div id="rosterModalList" class="space-y-2 max-h-64 overflow-y-auto mb-6 bg-[#0f172a] p-3 rounded-lg border border-slate-800"></div>
-      <button onclick="closeRosterModal()" class="w-full bg-slate-700 hover:bg-slate-600 text-slate-200 font-medium py-2.5 rounded-lg transition cursor-pointer">Close</button>
+      <button onclick="closeRosterModal()" class="w-full bg-slate-700 hover:bg-slate-600 text-slate-200 font-medium py-2.5 rounded-lg transition cursor-pointer" data-i18n="close">Close</button>
     </div>
   </div>
 
+  <!-- History Modal -->
   <div id="historyModal" class="fixed inset-0 bg-black/70 backdrop-blur-sm hidden items-center justify-center z-50 p-4">
     <div class="bg-[#1e293b] border border-slate-700 rounded-2xl max-w-3xl w-full p-6 shadow-2xl flex flex-col max-h-[85vh]">
       <div class="flex items-center justify-between mb-4 border-b border-slate-700 pb-3">
         <h3 class="text-xl font-bold text-slate-100 flex items-center gap-2">
-          <i class="fas fa-history text-cyan-400"></i> Match Statistics Registry History
+          <i class="fas fa-history text-cyan-400"></i> <span data-i18n="historyTitle">Match Statistics Registry</span>
         </h3>
         <button onclick="closeHistoryModal()" class="text-slate-400 hover:text-white transition text-xl cursor-pointer"><i class="fas fa-times"></i></button>
       </div>
@@ -222,11 +231,11 @@
         <table class="w-full text-left border-collapse">
           <thead>
             <tr class="bg-slate-800 text-slate-300 text-xs uppercase tracking-wider font-semibold border-b border-slate-700">
-              <th class="p-3">Match</th>
-              <th class="p-3">Home Team</th>
-              <th class="p-3 text-center">Score</th>
-              <th class="p-3">Away Team</th>
-              <th class="p-3">Action Stream Overview Summary</th>
+              <th class="p-3" data-i18n="thMatch">Match</th>
+              <th class="p-3" data-i18n="thHome">Home Team</th>
+              <th class="p-3 text-center" data-i18n="thScore">Score</th>
+              <th class="p-3" data-i18n="thAway">Away Team</th>
+              <th class="p-3" data-i18n="thSummary">Action Summary</th>
             </tr>
           </thead>
           <tbody id="historyTableBody" class="text-sm divide-y divide-slate-800 text-slate-300"></tbody>
@@ -235,17 +244,293 @@
 
       <div class="mt-4 pt-3 border-t border-slate-700 flex justify-between">
         <button onclick="clearAllStoredData()" class="bg-rose-900/40 hover:bg-rose-900 text-rose-300 border border-rose-700/60 font-medium px-4 py-2 rounded-lg text-sm transition cursor-pointer">
-          <i class="fas fa-trash-alt mr-1"></i> Factory Wipe Data
+          <i class="fas fa-trash-alt mr-1"></i> <span data-i18n="wipeData">Factory Wipe Data</span>
         </button>
-        <button onclick="closeHistoryModal()" class="bg-slate-700 hover:bg-slate-600 text-slate-200 px-5 py-2 rounded-lg text-sm font-medium transition cursor-pointer">Close Registry</button>
+        <button onclick="closeHistoryModal()" class="bg-slate-700 hover:bg-slate-600 text-slate-200 px-5 py-2 rounded-lg text-sm font-medium transition cursor-pointer" data-i18n="closeRegistry">Close Registry</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Overwrite/Continue Modal -->
+  <div id="overwriteModal" class="fixed inset-0 bg-black/70 backdrop-blur-sm hidden items-center justify-center z-50 p-4">
+    <div class="bg-[#1e293b] border border-slate-700 rounded-xl max-w-md w-full p-6 shadow-2xl">
+      <h3 class="text-xl font-bold text-amber-400 mb-2 flex items-center gap-2">
+        <i class="fas fa-exclamation-triangle"></i> <span data-i18n="existingDataTitle">Existing Match Data</span>
+      </h3>
+      <p id="overwriteModalMsg" class="text-slate-300 text-sm mb-6">This match already has recorded data.</p>
+      <div class="flex gap-3">
+        <button onclick="handleOverwriteChoice('continue')" class="flex-1 bg-emerald-700 hover:bg-emerald-600 text-white font-semibold py-2.5 rounded-lg transition flex items-center justify-center gap-2 cursor-pointer">
+          <i class="fas fa-play-circle"></i> <span data-i18n="continueMatch">Continue</span>
+        </button>
+        <button onclick="handleOverwriteChoice('overwrite')" class="flex-1 bg-rose-800 hover:bg-rose-700 text-white font-semibold py-2.5 rounded-lg transition flex items-center justify-center gap-2 cursor-pointer">
+          <i class="fas fa-redo"></i> <span data-i18n="overwriteMatch">Overwrite</span>
+        </button>
+        <button onclick="closeOverwriteModal()" class="flex-1 bg-slate-700 hover:bg-slate-600 text-slate-200 font-medium py-2.5 rounded-lg transition cursor-pointer" data-i18n="cancel">Cancel</button>
       </div>
     </div>
   </div>
 
   <script>
+    // ---------------------------------------------------------------
+    // TRANSLATIONS
+    // ---------------------------------------------------------------
+    const TRANSLATIONS = {
+      en: {
+        navViewData: "View Data",
+        navDownload: "Download Excel",
+        setupTitle: "Tournament Configuration",
+        setupSubtitle: "Configure your teams, players, and match settings.",
+        coreSettings: "1. Core Settings",
+        numTeams: "Number of Teams",
+        updateLayout: "Update Layout",
+        confirmLock: "Confirm & Lock Teams",
+        gameSettings: "2. Game Settings",
+        matchDuration: "Match Duration",
+        mins: "mins",
+        totalMatchesLabel: "Total Matches Planned",
+        decideGame: "Decide Game",
+        lockWarning: "Lock configurations to initialize fixtures.",
+        lockDone: "Settings locked.",
+        fixtureDashboard: "Fixture Dashboard",
+        fixtureSubtitle: "Set up the pairings for the upcoming round.",
+        homeTeam: "Home Team (A)",
+        awayTeam: "Away Team (B)",
+        roundSlot: "Round Slot",
+        setupConfig: "Setup Configuration",
+        okBtn: "OK",
+        changeMatchup: "Change Matchup",
+        start: "Start",
+        stop: "Stop",
+        resetClock: "Reset Clock",
+        goal: "GOAL",
+        block: "BLOCK",
+        timeline: "Live Action Metric Timeline",
+        assistedBy: "Assisted By",
+        cancel: "Cancel",
+        saveStats: "Save Stats",
+        rosterSubtitle: "Review registered squad members.",
+        close: "Close",
+        historyTitle: "Match Statistics Registry",
+        thMatch: "Match",
+        thHome: "Home Team",
+        thScore: "Score",
+        thAway: "Away Team",
+        thSummary: "Action Summary",
+        wipeData: "Factory Wipe Data",
+        closeRegistry: "Close Registry",
+        existingDataTitle: "Existing Match Data",
+        existingDataMsg: (label) => `"${label}" already has recorded data. Continue where you left off, or start fresh?`,
+        continueMatch: "Continue",
+        overwriteMatch: "Overwrite",
+        teamNameLabel: (i) => `Team ${i} Name`,
+        rosterCount: "Roster",
+        playerPlaceholder: "Type unique player name...",
+        goalLabel: (team) => `Log Goal: ${team}`,
+        blockLabel: (team) => `Log Block: ${team}`,
+        playerName: "Player Name",
+        unassisted: "Unassisted",
+        noPersonnel: "No personnel defined.",
+        rosterEmpty: "Roster is empty.",
+        noTimeline: "No stats logged yet.",
+        noHistory: "No historical matches saved.",
+        noEntries: "No entries logged.",
+        alertSameTeam: "A match requires two distinct teams.",
+        alertNoTeamName: "All teams must have names.",
+        alertDuplicate: "Player already on roster.",
+        alertNoTeamBeforePlayer: "Set a team name before adding players.",
+        alertLockSuccess: "Settings locked. Match selection active.",
+        alertEmptyExport: "No data to export.",
+        regulationExpired: (label) => `Time expired: ${label}`,
+        wipeConfirm: "Wipe all data?",
+        pruneLabel: (team) => `Remove from: ${team}`,
+        gameLabel: (n) => `Game ${n}`,
+      },
+      ja: {
+        navViewData: "データ表示",
+        navDownload: "Excel出力",
+        setupTitle: "トーナメント設定",
+        setupSubtitle: "チーム・選手・試合の設定を行ってください。",
+        coreSettings: "1. 基本設定",
+        numTeams: "チーム数",
+        updateLayout: "更新",
+        confirmLock: "確定してロック",
+        gameSettings: "2. ゲーム設定",
+        matchDuration: "試合時間",
+        mins: "分",
+        totalMatchesLabel: "試合数（予定）",
+        decideGame: "試合を決定",
+        lockWarning: "設定をロックして対戦表を初期化してください。",
+        lockDone: "設定がロックされました。",
+        fixtureDashboard: "対戦設定",
+        fixtureSubtitle: "次のラウンドの対戦を設定してください。",
+        homeTeam: "ホームチーム (A)",
+        awayTeam: "アウェイチーム (B)",
+        roundSlot: "ラウンド",
+        setupConfig: "設定に戻る",
+        okBtn: "OK",
+        changeMatchup: "対戦変更",
+        start: "開始",
+        stop: "停止",
+        resetClock: "リセット",
+        goal: "ゴール",
+        block: "ブロック",
+        timeline: "ライブアクション履歴",
+        assistedBy: "アシスト",
+        cancel: "キャンセル",
+        saveStats: "保存",
+        rosterSubtitle: "登録メンバーを確認してください。",
+        close: "閉じる",
+        historyTitle: "試合記録",
+        thMatch: "試合",
+        thHome: "ホームチーム",
+        thScore: "スコア",
+        thAway: "アウェイチーム",
+        thSummary: "アクション概要",
+        wipeData: "データ全削除",
+        closeRegistry: "閉じる",
+        existingDataTitle: "既存の試合データあり",
+        existingDataMsg: (label) => `「${label}」には既にデータがあります。続きから再開しますか？それとも上書きしますか？`,
+        continueMatch: "続きから再開",
+        overwriteMatch: "上書き",
+        teamNameLabel: (i) => `チーム ${i} 名前`,
+        rosterCount: "メンバー",
+        playerPlaceholder: "選手名を入力...",
+        goalLabel: (team) => `ゴール記録: ${team}`,
+        blockLabel: (team) => `ブロック記録: ${team}`,
+        playerName: "選手名",
+        unassisted: "アシストなし",
+        noPersonnel: "メンバーが登録されていません。",
+        rosterEmpty: "ロスターは空です。",
+        noTimeline: "まだ記録がありません。",
+        noHistory: "試合記録がありません。",
+        noEntries: "記録なし。",
+        alertSameTeam: "異なるチームを選択してください。",
+        alertNoTeamName: "すべてのチームに名前を付けてください。",
+        alertDuplicate: "この選手はすでに登録されています。",
+        alertNoTeamBeforePlayer: "チーム名を先に設定してください。",
+        alertLockSuccess: "設定がロックされました。試合設定が有効になりました。",
+        alertEmptyExport: "エクスポートするデータがありません。",
+        regulationExpired: (label) => `試合時間終了: ${label}`,
+        wipeConfirm: "すべてのデータを削除しますか？",
+        pruneLabel: (team) => `削除: ${team}`,
+        gameLabel: (n) => `ゲーム ${n}`,
+      },
+      zh: {
+        navViewData: "查看数据",
+        navDownload: "下载Excel",
+        setupTitle: "锦标赛配置",
+        setupSubtitle: "配置您的队伍、球员及比赛设置。",
+        coreSettings: "1. 核心设置",
+        numTeams: "队伍数量",
+        updateLayout: "更新布局",
+        confirmLock: "确认并锁定队伍",
+        gameSettings: "2. 游戏设置",
+        matchDuration: "比赛时长",
+        mins: "分钟",
+        totalMatchesLabel: "计划比赛场数",
+        decideGame: "确定比赛",
+        lockWarning: "锁定配置以初始化赛程。",
+        lockDone: "设置已锁定。",
+        fixtureDashboard: "赛程配置",
+        fixtureSubtitle: "为下一轮设置对阵。",
+        homeTeam: "主队 (A)",
+        awayTeam: "客队 (B)",
+        roundSlot: "轮次",
+        setupConfig: "返回设置",
+        okBtn: "确定",
+        changeMatchup: "更改对阵",
+        start: "开始",
+        stop: "暂停",
+        resetClock: "重置计时",
+        goal: "进球",
+        block: "拦截",
+        timeline: "实时动态记录",
+        assistedBy: "助攻",
+        cancel: "取消",
+        saveStats: "保存统计",
+        rosterSubtitle: "查看已注册的球员信息。",
+        close: "关闭",
+        historyTitle: "比赛统计记录",
+        thMatch: "比赛",
+        thHome: "主队",
+        thScore: "比分",
+        thAway: "客队",
+        thSummary: "动态概要",
+        wipeData: "清除所有数据",
+        closeRegistry: "关闭记录",
+        existingDataTitle: "已有比赛数据",
+        existingDataMsg: (label) => `"${label}" 已有记录数据。是继续还是覆盖？`,
+        continueMatch: "继续比赛",
+        overwriteMatch: "覆盖数据",
+        teamNameLabel: (i) => `队伍 ${i} 名称`,
+        rosterCount: "阵容",
+        playerPlaceholder: "输入球员姓名...",
+        goalLabel: (team) => `记录进球: ${team}`,
+        blockLabel: (team) => `记录拦截: ${team}`,
+        playerName: "球员姓名",
+        unassisted: "无助攻",
+        noPersonnel: "未登记任何球员。",
+        rosterEmpty: "名单为空。",
+        noTimeline: "暂无统计数据。",
+        noHistory: "暂无历史比赛记录。",
+        noEntries: "无记录。",
+        alertSameTeam: "请选择两支不同的队伍。",
+        alertNoTeamName: "所有队伍必须有名称。",
+        alertDuplicate: "该球员已在名单中。",
+        alertNoTeamBeforePlayer: "请先设置队伍名称。",
+        alertLockSuccess: "设置已锁定，可开始选择比赛。",
+        alertEmptyExport: "没有可导出的数据。",
+        regulationExpired: (label) => `比赛时间结束: ${label}`,
+        wipeConfirm: "清除所有数据？",
+        pruneLabel: (team) => `从 ${team} 中删除`,
+        gameLabel: (n) => `第${n}场`,
+      }
+    };
+
+    let currentLang = 'en';
+
+    function t(key, ...args) {
+      const val = TRANSLATIONS[currentLang][key];
+      if (typeof val === 'function') return val(...args);
+      return val || TRANSLATIONS['en'][key] || key;
+    }
+
+    function setLanguage(lang) {
+      currentLang = lang;
+      localStorage.setItem('scorekeeper_lang', lang);
+
+      ['langBtn_en','langBtn_ja','langBtn_zh'].forEach(id => {
+        document.getElementById(id).className = "px-3 py-2 transition cursor-pointer text-slate-400 hover:text-white";
+      });
+      document.getElementById('langBtn_' + lang).className = "px-3 py-2 transition cursor-pointer bg-slate-700 text-white rounded";
+
+      document.querySelectorAll('[data-i18n]').forEach(el => {
+        const key = el.getAttribute('data-i18n');
+        if (TRANSLATIONS[lang][key] && typeof TRANSLATIONS[lang][key] === 'string') {
+          el.textContent = TRANSLATIONS[lang][key];
+        }
+      });
+
+      // Refresh start/stop button text based on clock state
+      const runBtn = document.getElementById('startStopBtn');
+      if (runBtn) {
+        runBtn.textContent = clockState.isRunning ? t('stop') : t('start');
+        runBtn.className = clockState.isRunning
+          ? "bg-rose-500 hover:bg-rose-400 text-white font-bold px-6 py-2 rounded-lg shadow-md transition uppercase tracking-wider text-sm cursor-pointer"
+          : "bg-emerald-500 hover:bg-emerald-400 text-[#0f172a] font-bold px-6 py-2 rounded-lg shadow-md transition uppercase tracking-wider text-sm cursor-pointer";
+      }
+
+      // Rebuild team cards to reflect language
+      if (Object.keys(configuration.teams).length > 0) buildTeamUIContainer();
+    }
+
+    // ---------------------------------------------------------------
+    // STATE
+    // ---------------------------------------------------------------
     let configuration = { teams: {}, matchMinutes: 25, totalMatches: 3 };
     let activeBout = { teamAKey: "", teamBKey: "", matchLabel: "Game 1", scoreA: 0, scoreB: 0, timeline: [] };
     let globalHistoricalRegistry = []; 
+    let pendingLaunchTeamA = null, pendingLaunchTeamB = null, pendingLaunchLabel = null;
     
     let clockTickerInterval = null;
     let clockState = { isRunning: false, msRemainingWhenPaused: 1500 * 1000, expirationTimestamp: null, activePage: 'setupPage' };
@@ -255,10 +540,12 @@
     let workingTeamsCount = 2;
 
     window.addEventListener('DOMContentLoaded', () => {
+      const savedLang = localStorage.getItem('scorekeeper_lang') || 'en';
       loadStateFromStorage();
       buildTeamUIContainer();
       clockTickerInterval = setInterval(synchronizedClockTick, 200);
       routeToSavedPageContext();
+      setLanguage(savedLang);
     });
 
     function saveStateToStorage() {
@@ -304,15 +591,15 @@
     }
 
     function clearAllStoredData() {
-      if (confirm("Wipe all localized historical registry tables and system cache states clear?")) {
+      if (confirm(t('wipeConfirm'))) {
         localStorage.clear();
         location.reload();
       }
     }
 
-    // -----------------------------------------------------------------
-    // PHASE 1: CONFIGURATION ROSTER ENGINE
-    // -----------------------------------------------------------------
+    // ---------------------------------------------------------------
+    // PHASE 1: CONFIGURATION
+    // ---------------------------------------------------------------
     function changeTeamCount() {
       workingTeamsCount = parseInt(document.getElementById('numTeamsInput').value) || 2;
       buildTeamUIContainer();
@@ -334,17 +621,17 @@
           <div class="absolute left-0 top-0 bottom-0 w-1 bg-gradient-to-b from-cyan-500 to-blue-600"></div>
           <div class="flex flex-col md:flex-row gap-4 items-start md:items-center justify-between pb-3 border-b border-slate-700/50">
             <div class="w-full md:w-1/2">
-              <label class="block text-xs font-bold text-slate-400 uppercase tracking-wide mb-1">Team ${i} Name Profile</label>
+              <label class="block text-xs font-bold text-slate-400 uppercase tracking-wide mb-1">${t('teamNameLabel', i)}</label>
               <input type="text" id="teamName_${i}" class="team-name-field w-full bg-[#0f172a] border border-slate-600 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-cyan-500 text-slate-200 font-semibold" value="${fallbackName}">
             </div>
             <div class="flex items-center gap-2 mt-4 md:mt-0">
               <button onclick="displayRosterOverview(${i})" class="bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-300 text-xs px-3 py-2 rounded-lg font-medium transition flex items-center gap-1.5 cursor-pointer">
-                <i class="fas fa-users text-cyan-400"></i> Roster (<span id="rosterCountLabel_${i}">0</span>)
+                <i class="fas fa-users text-cyan-400"></i> ${t('rosterCount')} (<span id="rosterCountLabel_${i}">0</span>)
               </button>
             </div>
           </div>
           <div class="bg-[#0f172a]/40 p-3 rounded-lg border border-slate-800/80 flex gap-2 items-center">
-            <input type="text" id="memberIn_${i}" placeholder="Type unique player name label..." class="w-full bg-[#0f172a] border border-slate-700 rounded-lg px-3 py-1.5 text-xs text-slate-300 focus:outline-none focus:border-emerald-500">
+            <input type="text" id="memberIn_${i}" placeholder="${t('playerPlaceholder')}" class="w-full bg-[#0f172a] border border-slate-700 rounded-lg px-3 py-1.5 text-xs text-slate-300 focus:outline-none focus:border-emerald-500">
             <button onclick="appendPlayerItemToList(${i})" class="bg-emerald-600 hover:bg-emerald-500 text-white p-2 rounded-lg text-xs font-bold aspect-square flex items-center justify-center transition shadow cursor-pointer"><i class="fas fa-plus"></i></button>
             <button onclick="triggerRosterDeletionLayout(${i})" class="bg-rose-900/30 hover:bg-rose-900/60 border border-rose-800/50 text-rose-400 p-2 rounded-lg text-xs font-bold aspect-square flex items-center justify-center transition cursor-pointer"><i class="fas fa-minus"></i></button>
           </div>
@@ -369,11 +656,11 @@
       const teamKey = nameInput.value.trim();
       const playerVal = memberInput.value.trim();
 
-      if (!teamKey) return alert("Initialize Team Name profile parameters prior to assignment.");
+      if (!teamKey) return alert(t('alertNoTeamBeforePlayer'));
       if (!playerVal) return;
 
       if (!configuration.teams[teamKey]) configuration.teams[teamKey] = [];
-      if (configuration.teams[teamKey].includes(playerVal)) return alert("Specified registration target already exists on squad.");
+      if (configuration.teams[teamKey].includes(playerVal)) return alert(t('alertDuplicate'));
 
       configuration.teams[teamKey].push(playerVal);
       memberInput.value = '';
@@ -385,12 +672,12 @@
       const nameInput = document.getElementById(`teamName_${teamIndex}`);
       const teamKey = nameInput.value.trim();
       const listContainer = document.getElementById('rosterModalList');
-      document.getElementById('rosterModalTitle').innerText = `${teamKey || 'Unset'} Squad configuration`;
+      document.getElementById('rosterModalTitle').innerText = `${teamKey || '---'}`;
       listContainer.innerHTML = '';
 
       const players = configuration.teams[teamKey] || [];
       if (players.length === 0) {
-        listContainer.innerHTML = `<p class="text-slate-500 italic text-center py-4 text-xs">No personnel elements defined.</p>`;
+        listContainer.innerHTML = `<p class="text-slate-500 italic text-center py-4 text-xs">${t('noPersonnel')}</p>`;
       } else {
         players.forEach(p => {
           const block = document.createElement('div');
@@ -406,19 +693,19 @@
       const nameInput = document.getElementById(`teamName_${teamIndex}`);
       const teamKey = nameInput.value.trim();
       const listContainer = document.getElementById('rosterModalList');
-      document.getElementById('rosterModalTitle').innerText = `Prune: ${teamKey}`;
+      document.getElementById('rosterModalTitle').innerText = t('pruneLabel', teamKey);
       listContainer.innerHTML = '';
 
       const players = configuration.teams[teamKey] || [];
       if (players.length === 0) {
-        listContainer.innerHTML = `<p class="text-slate-500 italic text-center py-4 text-xs">Roster is empty.</p>`;
+        listContainer.innerHTML = `<p class="text-slate-500 italic text-center py-4 text-xs">${t('rosterEmpty')}</p>`;
       } else {
         players.forEach((p, idx) => {
           const block = document.createElement('div');
           block.className = "flex items-center justify-between text-slate-300 text-xs p-1.5 bg-slate-900/50 rounded border border-slate-800";
           block.innerHTML = `
             <span><i class="fas fa-user text-slate-500 mr-2"></i>${p}</span>
-            <button onclick="deleteSingleRosterMember('${teamKey}', ${idx}, ${teamIndex})" class="bg-rose-950 hover:bg-rose-900 border border-rose-800 text-rose-300 text-[10px] px-2 py-1 rounded transition cursor-pointer">Delete</button>
+            <button onclick="deleteSingleRosterMember('${teamKey}', ${idx}, ${teamIndex})" class="bg-rose-950 hover:bg-rose-900 border border-rose-800 text-rose-300 text-[10px] px-2 py-1 rounded transition cursor-pointer">${t('wipeData').includes('Factory') ? 'Delete' : t('wipeData')}</button>
           `;
           listContainer.appendChild(block);
         });
@@ -455,11 +742,11 @@
         }
       });
 
-      if (!valid) return alert("Ensure all structural squad components carry designated alphanumeric labels.");
+      if (!valid) return alert(t('alertNoTeamName'));
       configuration.teams = synchronizedTeamsObj;
       saveStateToStorage();
       enableDecideGame(true);
-      alert("All parameters localized successfully. Match selection engine active.");
+      alert(t('alertLockSuccess'));
     }
 
     function enableDecideGame(status) {
@@ -468,19 +755,19 @@
       if (status) {
         btn.disabled = false;
         btn.className = "w-full bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500 text-white font-bold py-3 rounded-lg transition shadow-md flex items-center justify-center gap-2 cursor-pointer";
-        warning.innerHTML = "<i class='fas fa-check-circle mr-1'></i> Settings locked.";
+        warning.innerHTML = `<i class='fas fa-check-circle mr-1'></i> ${t('lockDone')}`;
         warning.className = "text-xs text-emerald-400 text-center mt-2 font-medium";
       } else {
         btn.disabled = true;
         btn.className = "w-full bg-slate-600 text-slate-400 font-bold py-3 rounded-lg transition flex items-center justify-center gap-2 cursor-not-allowed";
-        warning.innerHTML = "<i class='fas fa-info-circle mr-1'></i> Lock configurations to initialize fixtures.";
+        warning.innerHTML = `<i class='fas fa-info-circle mr-1'></i> ${t('lockWarning')}`;
         warning.className = "text-xs text-amber-400/80 text-center mt-2";
       }
     }
 
-    // -----------------------------------------------------------------
-    // PHASE 2: FIXTURE MATRIX TRACKING
-    // -----------------------------------------------------------------
+    // ---------------------------------------------------------------
+    // PHASE 2: FIXTURE
+    // ---------------------------------------------------------------
     function goToMatchupSelection() {
       clockState.activePage = 'matchupPage';
       saveStateToStorage();
@@ -501,9 +788,9 @@
         selectB.add(optB);
       });
 
-      const totalRounds = parseInt(document.getElementById('totalMatches').value) || 3;
+      const totalRounds = parseInt(document.getElementById('totalMatches').value) || configuration.totalMatches || 3;
       for (let r = 1; r <= totalRounds; r++) {
-        selectMatch.add(new Option(`Game ${r}`, `Game ${r}`));
+        selectMatch.add(new Option(t('gameLabel', r), t('gameLabel', r)));
       }
     }
 
@@ -519,15 +806,58 @@
       const teamB = document.getElementById('selectTeamB').value;
       const matchLabel = document.getElementById('selectMatchNumber').value;
 
-      if (teamA === teamB) return alert("A match requires two distinct team identities. Select different pairings.");
+      if (teamA === teamB) return alert(t('alertSameTeam'));
 
       const preExistingMatch = globalHistoricalRegistry.find(m => m.matchLabel === matchLabel);
-      if (preExistingMatch && !confirm(`Historical performance entry logs for ${matchLabel} already exist. Overwrite file mapping elements?`)) return;
-      if (preExistingMatch) globalHistoricalRegistry = globalHistoricalRegistry.filter(m => m.matchLabel !== matchLabel);
+      // Also check if current activeBout matches and has data
+      const activeBoutMatches = activeBout.teamAKey && activeBout.matchLabel === matchLabel;
+      const hasExistingData = (preExistingMatch && preExistingMatch.timeline.length > 0) ||
+                              (activeBoutMatches && activeBout.timeline.length > 0);
+
+      if (hasExistingData) {
+        pendingLaunchTeamA = teamA;
+        pendingLaunchTeamB = teamB;
+        pendingLaunchLabel = matchLabel;
+        document.getElementById('overwriteModalMsg').textContent = t('existingDataMsg', matchLabel);
+        document.getElementById('overwriteModal').className = "fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-50 p-4";
+        return;
+      }
+
+      startMatch(teamA, teamB, matchLabel, false);
+    }
+
+    function handleOverwriteChoice(choice) {
+      closeOverwriteModal();
+      if (choice === 'continue') {
+        // Load existing data back into activeBout
+        const existing = globalHistoricalRegistry.find(m => m.matchLabel === pendingLaunchLabel);
+        if (existing) {
+          activeBout = JSON.parse(JSON.stringify(existing));
+          globalHistoricalRegistry = globalHistoricalRegistry.filter(m => m.matchLabel !== pendingLaunchLabel);
+        }
+        // If it's the current activeBout already, just go straight to tracker
+        clockState.activePage = 'trackerPage';
+        configuration.matchMinutes = parseInt(document.getElementById('matchMinutes').value) || 25;
+        saveStateToStorage();
+        hydrateTrackerUI();
+        document.getElementById('matchupPage').classList.add('hidden');
+        document.getElementById('trackerPage').classList.remove('hidden');
+      } else if (choice === 'overwrite') {
+        startMatch(pendingLaunchTeamA, pendingLaunchTeamB, pendingLaunchLabel, true);
+      }
+      pendingLaunchTeamA = pendingLaunchTeamB = pendingLaunchLabel = null;
+    }
+
+    function closeOverwriteModal() {
+      document.getElementById('overwriteModal').className = "hidden";
+    }
+
+    function startMatch(teamA, teamB, matchLabel, overwrite) {
+      if (overwrite) {
+        globalHistoricalRegistry = globalHistoricalRegistry.filter(m => m.matchLabel !== matchLabel);
+      }
 
       activeBout = { teamAKey: teamA, teamBKey: teamB, matchLabel: matchLabel, scoreA: 0, scoreB: 0, timeline: [] };
-      
-      // --- FIXED: Explicitly sync configurations configuration array state directly on launch ---
       configuration.matchMinutes = parseInt(document.getElementById('matchMinutes').value) || 25;
       
       clockState.isRunning = false;
@@ -541,9 +871,9 @@
       document.getElementById('trackerPage').classList.remove('hidden');
     }
 
-    // -----------------------------------------------------------------
-    // PHASE 3: METRIC SYSTEM COUNTERS
-    // -----------------------------------------------------------------
+    // ---------------------------------------------------------------
+    // PHASE 3: TRACKER
+    // ---------------------------------------------------------------
     function backToMatchup() {
       commitActiveBoutToHistory();
       clockState.activePage = 'matchupPage';
@@ -576,10 +906,10 @@
       document.getElementById('timerDisplay').innerText = `${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
       const runBtn = document.getElementById('startStopBtn');
       if (clockState.isRunning) {
-        runBtn.innerText = "Stop";
+        runBtn.innerText = t('stop');
         runBtn.className = "bg-rose-500 hover:bg-rose-400 text-white font-bold px-6 py-2 rounded-lg shadow-md transition uppercase tracking-wider text-sm cursor-pointer";
       } else {
-        runBtn.innerText = "Start";
+        runBtn.innerText = t('start');
         runBtn.className = "bg-emerald-500 hover:bg-emerald-400 text-[#0f172a] font-bold px-6 py-2 rounded-lg shadow-md transition uppercase tracking-wider text-sm cursor-pointer";
       }
     }
@@ -592,7 +922,7 @@
           clockState.msRemainingWhenPaused = 0;
           clockState.expirationTimestamp = null;
           saveStateToStorage();
-          alert(`Regulation play window expired for active assignment: ${activeBout.matchLabel}`);
+          alert(t('regulationExpired', activeBout.matchLabel));
           hydrateTrackerUI();
         }
       }
@@ -620,16 +950,16 @@
       refreshUIClockDisplayStrings();
     }
 
-    // -----------------------------------------------------------------
-    // LOG MODAL INTERACTION CONTROLLERS
-    // -----------------------------------------------------------------
+    // ---------------------------------------------------------------
+    // STAT MODAL
+    // ---------------------------------------------------------------
     function triggerStatModal(side, statType) {
       targetActiveSide = side; 
       currentModalStatType = statType;
       
       const targetTeamKey = (side === 'A') ? activeBout.teamAKey : activeBout.teamBKey;
-      document.getElementById('statModalTitle').innerText = `Log ${statType}: ${targetTeamKey}`;
-      document.getElementById('playerSelectLabel').innerText = `${statType} Player Name`;
+      document.getElementById('statModalTitle').innerText = statType === 'Goal' ? t('goalLabel', targetTeamKey) : t('blockLabel', targetTeamKey);
+      document.getElementById('playerSelectLabel').innerText = t('playerName');
 
       const pSelect = document.getElementById('playerSelect');
       const aSelect = document.getElementById('assistSelect');
@@ -647,7 +977,7 @@
 
       if (statType === 'Goal') {
         assistWrapper.classList.remove('hidden');
-        const nullOpt = new Option("Unassisted", "Unassisted");
+        const nullOpt = new Option(t('unassisted'), "Unassisted");
         nullOpt.selected = true;
         aSelect.insertBefore(nullOpt, aSelect.firstChild);
       } else {
@@ -671,9 +1001,11 @@
       let logText = "";
       if (currentModalStatType === 'Goal') {
         if (targetActiveSide === 'A') activeBout.scoreA++; else activeBout.scoreB++;
-        logText = `⚽ Goal by <strong>${player}</strong>${assist !== "Unassisted" ? ' (Assist: ' + assist + ')' : ''}`;
+        const assistDisplay = (assist !== "Unassisted") ? assist : t('unassisted');
+        const assistText = (assist !== "Unassisted") ? ` (${t('assistedBy')}: ${assist})` : '';
+        logText = `⚽ ${t('goal')}: <strong>${player}</strong>${assistText}`;
       } else {
-        logText = `🛡️ Defensive Block by <strong>${player}</strong>`;
+        logText = `🛡️ ${t('block')}: <strong>${player}</strong>`;
       }
 
       const themedTeamLabel = `<span class="${targetActiveSide === 'A' ? 'text-blue-400' : 'text-rose-400'} font-semibold">[${currentTeamKey}]</span> `;
@@ -697,7 +1029,7 @@
       const container = document.getElementById('timelineContainer');
       container.innerHTML = '';
       if (activeBout.timeline.length === 0) {
-        container.innerHTML = `<p class="text-slate-500 italic text-center py-4">No performance statistics registered down the timeline loop.</p>`;
+        container.innerHTML = `<p class="text-slate-500 italic text-center py-4">${t('noTimeline')}</p>`;
         return;
       }
       activeBout.timeline.forEach(evt => {
@@ -725,11 +1057,11 @@
       tbody.innerHTML = '';
 
       if (globalHistoricalRegistry.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="5" class="p-8 text-center text-slate-500 italic">No historical matches saved.</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="5" class="p-8 text-center text-slate-500 italic">${t('noHistory')}</td></tr>`;
       } else {
         globalHistoricalRegistry.forEach(m => {
-          let summary = m.timeline.map(t => `[${t.time}] ${t.type}: ${t.player}${t.assist ? ' (Asst: '+t.assist+')' : ''}`).join(', ');
-          if (!summary) summary = "No entries logged.";
+          let summary = m.timeline.map(te => `[${te.time}] ${te.type}: ${te.player}${te.assist ? ' (Asst: '+te.assist+')' : ''}`).join(', ');
+          if (!summary) summary = t('noEntries');
 
           const tr = document.createElement('tr');
           tr.className = "hover:bg-slate-800/40 transition border-b border-slate-800/60";
@@ -748,56 +1080,53 @@
 
     function closeHistoryModal() { document.getElementById('historyModal').className = "hidden"; }
 
-    // -----------------------------------------------------------------
-    // REAL-TIME ACTIONS EXCEL BUILDER SPREADSHEET ENGINE
-    // -----------------------------------------------------------------
+    // ---------------------------------------------------------------
+    // EXCEL EXPORT
+    // ---------------------------------------------------------------
     function exportToExcel() {
       commitActiveBoutToHistory();
-      if (globalHistoricalRegistry.length === 0) return alert("Historical data arrays are empty. Perform logging sequence before export processing.");
+      if (globalHistoricalRegistry.length === 0) return alert(t('alertEmptyExport'));
       
       const workbook = XLSX.utils.book_new();
       
-      // TAB ONE: GENERAL TOURNAMENT ROUNDS OVERVIEW SUMMARY
       const summaryDataMatrix = globalHistoricalRegistry.map(m => ({
         "Match Number": m.matchLabel,
         "Home Team (A)": m.teamAKey,
         "Home Score": m.scoreA,
         "Away Score": m.scoreB,
         "Away Team (B)": m.teamBKey,
-        "Total Live Actions Logged": m.timeline.length
+        "Total Actions Logged": m.timeline.length
       }));
       const summarySheet = XLSX.utils.json_to_sheet(summaryDataMatrix);
       XLSX.utils.book_append_sheet(workbook, summarySheet, "Tournament Overview");
       
-      // TAB TWO: DETAILED PERFORMANCE ACTIONS (DEDICATED STATS TRACKING)
       const performanceLogs = [];
       globalHistoricalRegistry.forEach(m => {
         if (m.timeline.length === 0) {
           performanceLogs.push({
-            "Match Instance": m.matchLabel,
-            "Timestamp Reference": "N/A",
-            "Affiliated Team": "N/A",
-            "Event Action Type": "No Performance Tracked",
-            "Player Name / Scorer": "N/A",
-            "Assist Credit": "N/A"
+            "Match": m.matchLabel,
+            "Time": "N/A",
+            "Team": "N/A",
+            "Action": "No Performance Tracked",
+            "Player": "N/A",
+            "Assist": "N/A"
           });
         } else {
-          // Parse events chronologically from game opening kickoff forward
-          [...m.timeline].reverse().forEach(t => {
+          [...m.timeline].reverse().forEach(te => {
             performanceLogs.push({
-              "Match Instance": m.matchLabel,
-              "Timestamp Reference": t.time,
-              "Affiliated Team": t.team,
-              "Event Action Type": t.type ? t.type.toUpperCase() : "GOAL",
-              "Player Name / Scorer": t.player,
-              "Assist Credit": t.type === "Goal" ? (t.assist || "Unassisted") : "N/A"
+              "Match": m.matchLabel,
+              "Time": te.time,
+              "Team": te.team,
+              "Action": te.type ? te.type.toUpperCase() : "GOAL",
+              "Player": te.player,
+              "Assist": te.type === "Goal" ? (te.assist || "Unassisted") : "N/A"
             });
           });
         }
       });
       
       const detailingSheet = XLSX.utils.json_to_sheet(performanceLogs);
-      XLSX.utils.book_append_sheet(workbook, detailingSheet, "Live Actions Log Matrix");
+      XLSX.utils.book_append_sheet(workbook, detailingSheet, "Live Actions Log");
       XLSX.writeFile(workbook, `Tournament_Performance_Registry.xlsx`);
     }
   </script>
