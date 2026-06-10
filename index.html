@@ -10,28 +10,40 @@
 </head>
 <body class="bg-[#0f172a] text-slate-100 font-sans min-h-screen">
 
+  <nav class="bg-[#1e293b] border-b border-slate-800 px-6 py-4 flex items-center justify-between shadow-md sticky top-0 z-40">
+    <div class="flex items-center gap-2 text-emerald-400 font-bold text-xl tracking-tight select-none">
+      <i class="fas fa-trophy"></i> <span>ScoreTracker Pro</span>
+    </div>
+    <div class="flex items-center gap-3">
+      <button onclick="openHistoryModal()" class="bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-200 px-4 py-2 rounded-lg text-sm font-medium transition flex items-center gap-2">
+        <i class="fas fa-database text-cyan-400"></i> View Data
+      </button>
+      <button onclick="exportToExcel()" class="bg-emerald-600 hover:bg-emerald-500 text-white px-4 py-2 rounded-lg text-sm font-medium transition shadow-md flex items-center gap-2">
+        <i class="fas fa-file-excel"></i> Download Excel
+      </button>
+    </div>
+  </nav>
+
   <div id="setupPage" class="max-w-4xl mx-auto px-4 py-8">
     <header class="text-center mb-8">
-      <h1 class="text-4xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 to-cyan-400 mb-2">
-        <i class="fas fa-trophy mr-2 text-amber-400"></i>Tournament Setup
-      </h1>
-      <p class="text-slate-400">Configure your teams, players, and match settings.</p>
+      <h1 class="text-3xl font-bold text-slate-100 mb-1">Tournament Initialization</h1>
+      <p class="text-slate-400 text-sm">Configure your active teams and individual player rosters.</p>
     </header>
 
     <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
       <div class="md:col-span-2 space-y-6">
         <div class="bg-[#1e293b] p-6 rounded-xl border border-slate-700 shadow-xl">
-          <h2 class="text-xl font-semibold mb-4 text-emerald-400 flex items-center gap-2">
+          <h2 class="text-lg font-semibold mb-4 text-emerald-400 flex items-center gap-2">
             <i class="fas fa-users-cog"></i> 1. Core Settings
           </h2>
-          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
               <label class="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">Number of Teams</label>
-              <input type="number" id="numTeamsInput" min="2" max="10" value="2" class="w-full bg-[#0f172a] border border-slate-600 rounded-lg px-4 py-2.5 focus:outline-none focus:border-emerald-500 transition">
+              <input type="number" id="numTeamsInput" min="2" max="10" value="2" class="w-full bg-[#0f172a] border border-slate-600 rounded-lg px-4 py-2 focus:outline-none focus:border-emerald-500 transition">
             </div>
             <div class="flex items-end">
-              <button onclick="changeTeamCount()" class="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-medium px-4 py-2.5 rounded-lg transition shadow-md flex items-center justify-center gap-2">
-                <i class="fas fa-sync"></i> Update Team Count
+              <button onclick="changeTeamCount()" class="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-medium px-4 py-2 rounded-lg transition shadow-md flex items-center justify-center gap-2">
+                <i class="fas fa-sync"></i> Update Team Layout
               </button>
             </div>
           </div>
@@ -47,8 +59,8 @@
       </div>
 
       <div class="space-y-6">
-        <div class="bg-[#1e293b] p-6 rounded-xl border border-slate-700 shadow-xl sticky top-6">
-          <h2 class="text-xl font-semibold mb-4 text-cyan-400 flex items-center gap-2">
+        <div class="bg-[#1e293b] p-6 rounded-xl border border-slate-700 shadow-xl sticky top-24">
+          <h2 class="text-lg font-semibold mb-4 text-cyan-400 flex items-center gap-2">
             <i class="fas fa-sliders-h"></i> 2. Game Settings
           </h2>
           
@@ -60,7 +72,6 @@
                 <span class="text-sm text-slate-400">mins</span>
               </div>
             </div>
-
             <div>
               <label class="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">Total Matches Planned</label>
               <input type="number" id="totalMatches" min="1" max="20" value="3" class="w-full bg-[#0f172a] border border-slate-600 rounded-lg px-3 py-2 text-center focus:outline-none focus:border-cyan-500">
@@ -80,26 +91,24 @@
 
   <div id="matchupPage" class="max-w-2xl mx-auto px-4 py-12 hidden">
     <div class="bg-[#1e293b] p-8 rounded-2xl border border-slate-700 shadow-2xl text-center">
-      <h2 class="text-3xl font-bold text-cyan-400 mb-2">Fixture Configuration</h2>
-      <p class="text-slate-400 mb-8">Select the parameters for the upcoming bout.</p>
+      <h2 class="text-2xl font-bold text-cyan-400 mb-1">Fixture Configuration</h2>
+      <p class="text-slate-400 text-sm mb-8">Select the parameters for the upcoming bout.</p>
 
       <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 items-center mb-8">
         <div class="bg-[#0f172a] p-4 rounded-xl border border-slate-700">
           <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Team A</label>
-          <select id="selectTeamA" class="w-full bg-[#1e293b] border border-slate-600 rounded-lg p-2 text-center focus:outline-none focus:border-blue-500 text-blue-400 font-semibold"></select>
+          <select id="selectTeamA" class="w-full bg-[#1e293b] border border-slate-600 rounded-lg p-2 text-center text-blue-400 font-semibold focus:outline-none"></select>
         </div>
-
         <div class="text-xl font-bold text-slate-500 uppercase tracking-widest py-2">vs</div>
-
         <div class="bg-[#0f172a] p-4 rounded-xl border border-slate-700">
           <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Team B</label>
-          <select id="selectTeamB" class="w-full bg-[#1e293b] border border-slate-600 rounded-lg p-2 text-center focus:outline-none focus:border-rose-500 text-rose-400 font-semibold"></select>
+          <select id="selectTeamB" class="w-full bg-[#1e293b] border border-slate-600 rounded-lg p-2 text-center text-rose-400 font-semibold focus:outline-none"></select>
         </div>
       </div>
 
       <div class="w-32 mx-auto mb-8">
         <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Match Slot</label>
-        <select id="selectMatchNumber" class="w-full bg-[#0f172a] border border-slate-600 rounded-lg p-2 text-center focus:outline-none text-slate-200"></select>
+        <select id="selectMatchNumber" class="w-full bg-[#0f172a] border border-slate-600 rounded-lg p-2 text-center text-slate-200 focus:outline-none"></select>
       </div>
 
       <div class="flex gap-4">
@@ -113,93 +122,78 @@
     </div>
   </div>
 
-  <div id="trackerPage" class="hidden">
-    <nav class="bg-[#1e293b] border-b border-slate-800 px-6 py-4 flex items-center justify-between shadow-md">
-      <div class="flex items-center gap-4">
-        <button onclick="backToMatchup()" class="text-slate-400 hover:text-white transition px-3 py-1.5 rounded-lg border border-slate-700 hover:bg-slate-800 text-sm flex items-center gap-1.5">
-          <i class="fas fa-chevron-left"></i> Back
-        </button>
-        <div class="flex items-center gap-2 text-emerald-400 font-bold text-xl tracking-tight">
-          <i class="fas fa-trophy"></i> <span>ScoreTracker</span>
-        </div>
-      </div>
-      <div class="flex items-center gap-3">
-        <button onclick="openHistoryModal()" class="bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-200 px-4 py-2 rounded-lg text-sm font-medium transition flex items-center gap-2">
-          <i class="fas fa-database text-cyan-400"></i> View Data
-        </button>
-        <button onclick="exportToExcel()" class="bg-emerald-600 hover:bg-emerald-500 text-white px-4 py-2 rounded-lg text-sm font-medium transition shadow-md flex items-center gap-2">
-          <i class="fas fa-file-excel"></i> Download Excel
-        </button>
-      </div>
-    </nav>
+  <div id="trackerPage" class="hidden max-w-4xl mx-auto px-4 py-8 space-y-6">
+    <div class="flex items-center justify-between">
+      <button onclick="backToMatchup()" class="text-slate-400 hover:text-white transition px-3 py-1.5 rounded-lg border border-slate-700 hover:bg-slate-800 text-sm flex items-center gap-1.5">
+        <i class="fas fa-chevron-left"></i> Back to Matchup
+      </button>
+      <div id="matchLabelDisplay" class="bg-cyan-950 text-cyan-400 border border-cyan-800 text-xs font-bold px-3 py-1 rounded-full uppercase tracking-widest">Game 1</div>
+    </div>
 
-    <main class="max-w-4xl mx-auto px-4 py-8 space-y-6">
-      
-      <div class="bg-[#1e293b] border border-slate-700 rounded-2xl p-6 text-center max-w-md mx-auto shadow-xl">
-        <div id="matchLabelDisplay" class="text-xs font-bold text-cyan-400 uppercase tracking-widest mb-1">Game 1</div>
-        <div id="timerDisplay" class="text-6xl font-mono font-bold text-slate-100 tracking-wider my-3 select-none">25:00</div>
-        <div class="flex justify-center gap-3 mt-4">
-          <button id="startStopBtn" onclick="toggleTimer()" class="bg-emerald-500 hover:bg-emerald-400 text-[#0f172a] font-bold px-6 py-2 rounded-lg shadow-md transition uppercase tracking-wider text-sm">
-            Start
-          </button>
-          <button onclick="resetTimer()" class="bg-slate-700 hover:bg-slate-600 text-slate-300 font-medium px-4 py-2 rounded-lg transition text-sm">
-            Reset Clock
-          </button>
-        </div>
+    <div class="bg-[#1e293b] border border-slate-700 rounded-2xl p-6 text-center max-w-md mx-auto shadow-xl">
+      <div id="timerDisplay" class="text-6xl font-mono font-bold text-slate-100 tracking-wider mb-3 select-none">25:00</div>
+      <div class="flex justify-center gap-3">
+        <button id="startStopBtn" onclick="toggleTimer()" class="bg-emerald-500 hover:bg-emerald-400 text-[#0f172a] font-bold px-6 py-2 rounded-lg shadow-md transition uppercase tracking-wider text-sm">Start</button>
+        <button onclick="resetTimer()" class="bg-slate-700 hover:bg-slate-600 text-slate-300 font-medium px-4 py-2 rounded-lg transition text-sm">Reset Clock</button>
       </div>
+    </div>
 
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-        
-        <div class="bg-[#1e293b] border-t-4 border-blue-500 rounded-xl p-6 shadow-lg flex flex-col justify-between">
-          <div class="text-center">
-            <h3 id="displayTeamAName" class="text-2xl font-bold text-blue-400 mb-1">Team A</h3>
-            <div id="scoreA" class="text-8xl font-black text-slate-100 my-4 select-none">0</div>
-          </div>
-          <button onclick="triggerScorerModal('A')" class="w-full bg-blue-600 hover:bg-blue-500 text-white font-bold py-3.5 rounded-lg transition shadow-md text-base tracking-wide flex items-center justify-center gap-2 mt-2">
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <div class="bg-[#1e293b] border-t-4 border-blue-500 rounded-xl p-6 shadow-lg flex flex-col justify-between">
+        <div class="text-center">
+          <h3 id="displayTeamAName" class="text-2xl font-bold text-blue-400 truncate mb-1">Team A</h3>
+          <div id="scoreA" class="text-8xl font-black text-slate-100 my-4 select-none">0</div>
+        </div>
+        <div class="grid grid-cols-2 gap-2 mt-2">
+          <button onclick="triggerStatModal('A', 'Goal')" class="bg-blue-600 hover:bg-blue-500 text-white font-bold py-3 rounded-lg transition text-sm flex items-center justify-center gap-1.5 shadow">
             <i class="fas fa-plus-circle"></i> + GOAL
           </button>
-        </div>
-
-        <div class="bg-[#1e293b] border-t-4 border-rose-500 rounded-xl p-6 shadow-lg flex flex-col justify-between">
-          <div class="text-center">
-            <h3 id="displayTeamBName" class="text-2xl font-bold text-rose-400 mb-1">Team B</h3>
-            <div id="scoreB" class="text-8xl font-black text-slate-100 my-4 select-none">0</div>
-          </div>
-          <button onclick="triggerScorerModal('B')" class="w-full bg-rose-600 hover:bg-rose-500 text-white font-bold py-3.5 rounded-lg transition shadow-md text-base tracking-wide flex items-center justify-center gap-2 mt-2">
-            <i class="fas fa-plus-circle"></i> + GOAL
+          <button onclick="triggerStatModal('A', 'Block')" class="bg-slate-700 hover:bg-slate-600 text-slate-200 font-semibold py-3 rounded-lg transition text-sm flex items-center justify-center gap-1.5 border border-slate-600">
+            <i class="fas fa-shield-alt text-blue-400"></i> + BLOCK
           </button>
         </div>
-
       </div>
 
-      <div class="bg-[#1e293b] border border-slate-700 rounded-xl p-5 shadow-lg">
-        <h4 class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-3 flex items-center gap-2">
-          <i class="fas fa-stream text-cyan-400"></i> Live Match Timeline
-        </h4>
-        <div id="timelineContainer" class="space-y-2 max-h-48 overflow-y-auto pr-2 text-sm">
-          <p class="text-slate-500 italic">No goals scored yet in this match.</p>
+      <div class="bg-[#1e293b] border-t-4 border-rose-500 rounded-xl p-6 shadow-lg flex flex-col justify-between">
+        <div class="text-center">
+          <h3 id="displayTeamBName" class="text-2xl font-bold text-rose-400 truncate mb-1">Team B</h3>
+          <div id="scoreB" class="text-8xl font-black text-slate-100 my-4 select-none">0</div>
+        </div>
+        <div class="grid grid-cols-2 gap-2 mt-2">
+          <button onclick="triggerStatModal('B', 'Goal')" class="bg-rose-600 hover:bg-rose-500 text-white font-bold py-3 rounded-lg transition text-sm flex items-center justify-center gap-1.5 shadow">
+            <i class="fas fa-plus-circle"></i> + GOAL
+          </button>
+          <button onclick="triggerStatModal('B', 'Block')" class="bg-slate-700 hover:bg-slate-600 text-slate-200 font-semibold py-3 rounded-lg transition text-sm flex items-center justify-center gap-1.5 border border-slate-600">
+            <i class="fas fa-shield-alt text-rose-400"></i> + BLOCK
+          </button>
         </div>
       </div>
+    </div>
 
-    </main>
+    <div class="bg-[#1e293b] border border-slate-700 rounded-xl p-5 shadow-lg">
+      <h4 class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-3 flex items-center gap-2">
+        <i class="fas fa-stream text-cyan-400"></i> Match Statistics Timeline (Real-Time Feed)
+      </h4>
+      <div id="timelineContainer" class="space-y-2 max-h-48 overflow-y-auto pr-2 text-sm"></div>
+    </div>
   </div>
 
-  <div id="scorerModal" class="fixed inset-0 bg-black/70 backdrop-blur-sm hidden items-center justify-center z-50 p-4">
+  <div id="statModal" class="fixed inset-0 bg-black/70 backdrop-blur-sm hidden items-center justify-center z-50 p-4">
     <div class="bg-[#1e293b] border border-slate-700 rounded-xl max-w-md w-full p-6 shadow-2xl relative">
-      <h3 id="modalTitle" class="text-xl font-bold text-slate-100 mb-4">Record Goal</h3>
+      <h3 id="statModalTitle" class="text-xl font-bold text-slate-100 mb-4">Record Performance</h3>
       <div class="space-y-4 mb-6">
         <div>
-          <label class="block text-xs font-semibold text-slate-400 uppercase mb-1.5">Scorer Name</label>
-          <select id="scorerSelect" class="w-full bg-[#0f172a] border border-slate-600 rounded-lg p-2.5 focus:outline-none focus:border-emerald-500"></select>
+          <label id="playerSelectLabel" class="block text-xs font-semibold text-slate-400 uppercase mb-1.5">Player Name</label>
+          <select id="playerSelect" class="w-full bg-[#0f172a] border border-slate-600 rounded-lg p-2.5 text-slate-200 focus:outline-none focus:border-emerald-500"></select>
         </div>
-        <div>
-          <label class="block text-xs font-semibold text-slate-400 uppercase mb-1.5">Assist By</label>
-          <select id="assistSelect" class="w-full bg-[#0f172a] border border-slate-600 rounded-lg p-2.5 focus:outline-none focus:border-emerald-500"></select>
+        <div id="assistSelectionWrapper">
+          <label class="block text-xs font-semibold text-slate-400 uppercase mb-1.5">Assisted By</label>
+          <select id="assistSelect" class="w-full bg-[#0f172a] border border-slate-600 rounded-lg p-2.5 text-slate-200 focus:outline-none focus:border-emerald-500"></select>
         </div>
       </div>
       <div class="flex gap-3">
-        <button onclick="closeScorerModal()" class="w-1/2 bg-slate-700 hover:bg-slate-600 text-slate-200 font-medium py-2 rounded-lg transition">Cancel</button>
-        <button onclick="submitGoalRecord()" class="w-1/2 bg-emerald-600 hover:bg-emerald-500 text-white font-semibold py-2 rounded-lg transition shadow-md">Confirm Goal</button>
+        <button onclick="closeStatModal()" class="w-1/2 bg-slate-700 hover:bg-slate-600 text-slate-200 font-medium py-2 rounded-lg transition">Cancel</button>
+        <button onclick="submitStatRecord()" class="w-1/2 bg-emerald-600 hover:bg-emerald-500 text-white font-semibold py-2 rounded-lg transition shadow-md">Confirm Action</button>
       </div>
     </div>
   </div>
@@ -216,7 +210,7 @@
   <div id="historyModal" class="fixed inset-0 bg-black/70 backdrop-blur-sm hidden items-center justify-center z-50 p-4">
     <div class="bg-[#1e293b] border border-slate-700 rounded-2xl max-w-3xl w-full p-6 shadow-2xl flex flex-col max-h-[85vh]">
       <div class="flex items-center justify-between mb-4 border-b border-slate-700 pb-3">
-        <h3 class="text-2xl font-bold text-slate-100 flex items-center gap-2">
+        <h3 class="text-xl font-bold text-slate-100 flex items-center gap-2">
           <i class="fas fa-history text-cyan-400"></i> Match History Registry
         </h3>
         <button onclick="closeHistoryModal()" class="text-slate-400 hover:text-white transition text-xl"><i class="fas fa-times"></i></button>
@@ -230,14 +224,10 @@
               <th class="p-3">Home Team</th>
               <th class="p-3 text-center">Score</th>
               <th class="p-3">Away Team</th>
-              <th class="p-3">Event Detail Log</th>
+              <th class="p-3">Event Detail Actions Log</th>
             </tr>
           </thead>
-          <tbody id="historyTableBody" class="text-sm divide-y divide-slate-800 text-slate-300">
-            <tr>
-              <td colspan="5" class="p-8 text-center text-slate-500 italic">No matches recorded in history log yet.</td>
-            </tr>
-          </tbody>
+          <tbody id="historyTableBody" class="text-sm divide-y divide-slate-800 text-slate-300"></tbody>
         </table>
       </div>
 
@@ -251,51 +241,24 @@
   </div>
 
   <script>
-    // State Engine Repository
-    let configuration = {
-      teams: {}, // Format: { "Team Alpha": ["Player 1", "Player 2"], ... }
-      matchMinutes: 25,
-      totalMatches: 3
-    };
-
-    let activeBout = {
-      teamAKey: "",
-      teamBKey: "",
-      matchLabel: "Game 1",
-      scoreA: 0,
-      scoreB: 0,
-      timeline: []
-    };
-
+    let configuration = { teams: {}, matchMinutes: 25, totalMatches: 3 };
+    let activeBout = { teamAKey: "", teamBKey: "", matchLabel: "Game 1", scoreA: 0, scoreB: 0, timeline: [] };
     let globalHistoricalRegistry = []; 
     
-    // Core Background Time Engine Fields
     let clockTickerInterval = null;
-    let clockState = {
-      isRunning: false,
-      msRemainingWhenPaused: 1500 * 1000,
-      expirationTimestamp: null, // Absolute Epoch Millisecond time boundary when timer = 0
-      activePage: 'setupPage' // Tracks navigation page layer state to restore on refresh
-    };
+    let clockState = { isRunning: false, msRemainingWhenPaused: 1500 * 1000, expirationTimestamp: null, activePage: 'setupPage' };
 
     let targetActiveSide = null; 
+    let currentModalStatType = 'Goal'; // 'Goal' or 'Block'
     let workingTeamsCount = 2;
 
-    // Initial Load Launch Engine
     window.addEventListener('DOMContentLoaded', () => {
       loadStateFromStorage();
       buildTeamUIContainer();
-      
-      // Global background synchronization clock looping handler
       clockTickerInterval = setInterval(synchronizedClockTick, 200);
-      
-      // Force page state recovery layout routing if returning mid-match
       routeToSavedPageContext();
     });
 
-    // -----------------------------------------------------------------
-    // STORAGE RETRIEVAL & HYDRATION LOGIC
-    // -----------------------------------------------------------------
     function saveStateToStorage() {
       localStorage.setItem('scorekeeper_config', JSON.stringify(configuration));
       localStorage.setItem('scorekeeper_activeBout', JSON.stringify(activeBout));
@@ -315,9 +278,7 @@
         document.getElementById('totalMatches').value = configuration.totalMatches;
         workingTeamsCount = Object.keys(configuration.teams).length || 2;
         document.getElementById('numTeamsInput').value = workingTeamsCount;
-        if (Object.keys(configuration.teams).length > 0) {
-          enableDecideGame(true);
-        }
+        if (Object.keys(configuration.teams).length > 0) enableDecideGame(true);
       }
       if (storedBout) activeBout = JSON.parse(storedBout);
       if (storedHistory) globalHistoricalRegistry = JSON.parse(storedHistory);
@@ -325,7 +286,6 @@
     }
 
     function routeToSavedPageContext() {
-      // Hide all phases first
       document.getElementById('setupPage').classList.add('hidden');
       document.getElementById('matchupPage').classList.add('hidden');
       document.getElementById('trackerPage').classList.add('hidden');
@@ -342,7 +302,7 @@
     }
 
     function clearAllStoredData() {
-      if (confirm("Are you absolutely sure you want to completely wipe all configuration, registered rosters, and match histories?")) {
+      if (confirm("Wipe all tournament logs, metadata, and cache structures clean?")) {
         localStorage.clear();
         location.reload();
       }
@@ -360,40 +320,31 @@
     function buildTeamUIContainer() {
       const container = document.getElementById('teamsContainer');
       container.innerHTML = '';
-
       const existingTeamKeys = Object.keys(configuration.teams);
 
       for (let i = 1; i <= workingTeamsCount; i++) {
         const fallbackName = existingTeamKeys[i - 1] || `Team ${String.fromCharCode(64 + i)}`;
-        if (!configuration.teams[fallbackName]) {
-          configuration.teams[fallbackName] = [];
-        }
+        if (!configuration.teams[fallbackName]) configuration.teams[fallbackName] = [];
 
         const card = document.createElement('div');
         card.className = "bg-[#1e293b] p-5 rounded-xl border border-slate-700 shadow-md space-y-4 relative overflow-hidden";
         card.innerHTML = `
           <div class="absolute left-0 top-0 bottom-0 w-1 bg-gradient-to-b from-cyan-500 to-blue-600"></div>
-          
           <div class="flex flex-col md:flex-row gap-4 items-start md:items-center justify-between pb-3 border-b border-slate-700/50">
             <div class="w-full md:w-1/2">
               <label class="block text-xs font-bold text-slate-400 uppercase tracking-wide mb-1">Team ${i} Identity Name</label>
               <input type="text" id="teamName_${i}" class="team-name-field w-full bg-[#0f172a] border border-slate-600 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-cyan-500 text-slate-200 font-semibold" value="${fallbackName}">
             </div>
-            <div class="flex items-center gap-2 mt-4 md:mt-0 self-end md:self-auto">
+            <div class="flex items-center gap-2 mt-4 md:mt-0">
               <button onclick="displayRosterOverview(${i})" class="bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-300 text-xs px-3 py-2 rounded-lg font-medium transition flex items-center gap-1.5">
                 <i class="fas fa-users text-cyan-400"></i> View Members (<span id="rosterCountLabel_${i}">0</span>)
               </button>
             </div>
           </div>
-
           <div class="bg-[#0f172a]/40 p-3 rounded-lg border border-slate-800/80 flex gap-2 items-center">
-            <input type="text" id="memberIn_${i}" placeholder="Enter individual player name..." class="w-full bg-[#0f172a] border border-slate-700 rounded-lg px-3 py-1.5 text-xs text-slate-300 placeholder-slate-500 focus:outline-none focus:border-emerald-500">
-            <button onclick="appendPlayerItemToList(${i})" class="bg-emerald-600 hover:bg-emerald-500 text-white p-2 rounded-lg text-xs font-bold aspect-square flex items-center justify-center transition shadow" title="Add Member">
-              <i class="fas fa-plus"></i>
-            </button>
-            <button onclick="triggerRosterDeletionLayout(${i})" class="bg-rose-900/30 hover:bg-rose-900/60 border border-rose-800/50 text-rose-400 p-2 rounded-lg text-xs font-bold aspect-square flex items-center justify-center transition" title="Remove Member Selection">
-              <i class="fas fa-minus"></i>
-            </button>
+            <input type="text" id="memberIn_${i}" placeholder="Enter individual player name..." class="w-full bg-[#0f172a] border border-slate-700 rounded-lg px-3 py-1.5 text-xs text-slate-300 focus:outline-none focus:border-emerald-500">
+            <button onclick="appendPlayerItemToList(${i})" class="bg-emerald-600 hover:bg-emerald-500 text-white p-2 rounded-lg text-xs font-bold aspect-square flex items-center justify-center transition shadow"><i class="fas fa-plus"></i></button>
+            <button onclick="triggerRosterDeletionLayout(${i})" class="bg-rose-900/30 hover:bg-rose-900/60 border border-rose-800/50 text-rose-400 p-2 rounded-lg text-xs font-bold aspect-square flex items-center justify-center transition"><i class="fas fa-minus"></i></button>
           </div>
         `;
         container.appendChild(card);
@@ -413,29 +364,17 @@
     function appendPlayerItemToList(teamIndex) {
       const nameInput = document.getElementById(`teamName_${teamIndex}`);
       const memberInput = document.getElementById(`memberIn_${teamIndex}`);
-      
       const teamKey = nameInput.value.trim();
       const playerVal = memberInput.value.trim();
 
-      if (!teamKey) {
-        alert("Please set a Team Identity Name prior to appending members.");
-        return;
-      }
+      if (!teamKey) return alert("Set a Team Name first.");
       if (!playerVal) return;
 
-      // Transfer records safely if user changed the name input box string dynamically
-      if (!configuration.teams[teamKey]) {
-        configuration.teams[teamKey] = [];
-      }
-
-      if (configuration.teams[teamKey].includes(playerVal)) {
-        alert("This player is already listed on this team's roster.");
-        return;
-      }
+      if (!configuration.teams[teamKey]) configuration.teams[teamKey] = [];
+      if (configuration.teams[teamKey].includes(playerVal)) return alert("Player already listed.");
 
       configuration.teams[teamKey].push(playerVal);
-      memberInput.value = ''; // Reset input container field immediately
-      
+      memberInput.value = '';
       updateRosterCounterDisplayBadge(teamIndex);
       saveStateToStorage();
     }
@@ -444,33 +383,28 @@
       const nameInput = document.getElementById(`teamName_${teamIndex}`);
       const teamKey = nameInput.value.trim();
       const listContainer = document.getElementById('rosterModalList');
-      
       document.getElementById('rosterModalTitle').innerText = `${teamKey || 'Unassigned'} Roster`;
       listContainer.innerHTML = '';
 
       const players = configuration.teams[teamKey] || [];
       if (players.length === 0) {
-        listContainer.innerHTML = `<p class="text-slate-500 italic text-center py-4 text-xs">No roster members signed up yet.</p>`;
+        listContainer.innerHTML = `<p class="text-slate-500 italic text-center py-4 text-xs">No members signed up yet.</p>`;
       } else {
         players.forEach(p => {
           const block = document.createElement('div');
-          block.className = "flex items-center justify-between text-slate-300 text-xs py-1.5 border-b border-slate-800/60 last:border-0";
+          block.className = "text-slate-300 text-xs py-1.5 border-b border-slate-800/60 last:border-0";
           block.innerHTML = `<span><i class="fas fa-user text-slate-500 mr-2"></i>${p}</span>`;
           listContainer.appendChild(block);
         });
       }
-
-      const modal = document.getElementById('rosterModal');
-      modal.classList.remove('hidden');
-      modal.classList.add('flex');
+      document.getElementById('rosterModal').className = "fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-50 p-4";
     }
 
     function triggerRosterDeletionLayout(teamIndex) {
       const nameInput = document.getElementById(`teamName_${teamIndex}`);
       const teamKey = nameInput.value.trim();
       const listContainer = document.getElementById('rosterModalList');
-      
-      document.getElementById('rosterModalTitle').innerText = `Manage & Remove: ${teamKey}`;
+      document.getElementById('rosterModalTitle').innerText = `Manage: ${teamKey}`;
       listContainer.innerHTML = '';
 
       const players = configuration.teams[teamKey] || [];
@@ -479,20 +413,15 @@
       } else {
         players.forEach((p, idx) => {
           const block = document.createElement('div');
-          block.className = "flex items-center justify-between text-slate-300 text-xs p-1 bg-slate-900/50 rounded border border-slate-800";
+          block.className = "flex items-center justify-between text-slate-300 text-xs p-1.5 bg-slate-900/50 rounded border border-slate-800";
           block.innerHTML = `
             <span><i class="fas fa-user text-slate-500 mr-2"></i>${p}</span>
-            <button onclick="deleteSingleRosterMember('${teamKey}', ${idx}, ${teamIndex})" class="bg-rose-950 hover:bg-rose-900 border border-rose-800 text-rose-300 text-[10px] px-2 py-1 rounded transition">
-              <i class="fas fa-trash-alt mr-1"></i> Kick
-            </button>
+            <button onclick="deleteSingleRosterMember('${teamKey}', ${idx}, ${teamIndex})" class="bg-rose-950 hover:bg-rose-900 border border-rose-800 text-rose-300 text-[10px] px-2 py-1 rounded transition">Remove</button>
           `;
           listContainer.appendChild(block);
         });
       }
-
-      const modal = document.getElementById('rosterModal');
-      modal.classList.remove('hidden');
-      modal.classList.add('flex');
+      document.getElementById('rosterModal').className = "fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-50 p-4";
     }
 
     function deleteSingleRosterMember(teamKey, playerIndex, originalTeamIndex) {
@@ -500,51 +429,35 @@
         configuration.teams[teamKey].splice(playerIndex, 1);
         saveStateToStorage();
         updateRosterCounterDisplayBadge(originalTeamIndex);
-        
-        // Re-render modal workspace list box dynamically
         triggerRosterDeletionLayout(originalTeamIndex);
       }
     }
 
-    function closeRosterModal() {
-      document.getElementById('rosterModal').classList.add('hidden');
-    }
+    function closeRosterModal() { document.getElementById('rosterModal').className = "hidden"; }
 
     function lockAndConfirmTeams() {
       const nameFields = document.querySelectorAll('.team-name-field');
       const synchronizedTeamsObj = {};
-      
       configuration.matchMinutes = parseInt(document.getElementById('matchMinutes').value) || 25;
       configuration.totalMatches = parseInt(document.getElementById('totalMatches').value) || 3;
 
-      let validationPassed = true;
+      let valid = true;
       nameFields.forEach((input, index) => {
-        const cleanedName = input.value.trim();
-        if (!cleanedName) {
-          validationPassed = false;
-          input.classList.add('border-rose-500');
-        } else {
+        const name = input.value.trim();
+        if (!name) { valid = false; input.classList.add('border-rose-500'); }
+        else {
           input.classList.remove('border-rose-500');
-          // Re-map arrays to brand new locked validated list object state repo
-          const lookupOldNameField = Object.keys(configuration.teams)[index] || cleanedName;
-          synchronizedTeamsObj[cleanedName] = configuration.teams[lookupOldNameField] || configuration.teams[cleanedName] || [];
-          
-          if (synchronizedTeamsObj[cleanedName].length === 0) {
-            synchronizedTeamsObj[cleanedName].push("Solo Scorer");
-          }
+          const lookupOldKey = Object.keys(configuration.teams)[index] || name;
+          synchronizedTeamsObj[name] = configuration.teams[lookupOldKey] || configuration.teams[name] || [];
+          if (synchronizedTeamsObj[name].length === 0) synchronizedTeamsObj[name].push("Solo Contender");
         }
       });
 
-      if (!validationPassed) {
-        alert("Please confirm all generated team card slots possess an explicit identifier name.");
-        return;
-      }
-
+      if (!valid) return alert("Ensure all fields have an identifier name.");
       configuration.teams = synchronizedTeamsObj;
       saveStateToStorage();
       enableDecideGame(true);
-      
-      alert("All setup configurations authenticated and locked! Match selection dashboard is ready.");
+      alert("All configurations locked! Match creation dashboards enabled.");
     }
 
     function enableDecideGame(status) {
@@ -553,23 +466,22 @@
       if (status) {
         btn.disabled = false;
         btn.className = "w-full bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500 text-white font-bold py-3 rounded-lg transition shadow-md flex items-center justify-center gap-2 cursor-pointer";
-        warning.className = "text-xs text-emerald-400 text-center mt-2 font-medium animate-pulse";
-        warning.innerHTML = "<i class='fas fa-check-circle mr-1'></i> Settings locked and ready.";
+        warning.innerHTML = "<i class='fas fa-check-circle mr-1'></i> Configurations active.";
+        warning.className = "text-xs text-emerald-400 text-center mt-2 font-medium";
       } else {
         btn.disabled = true;
         btn.className = "w-full bg-slate-600 text-slate-400 font-bold py-3 rounded-lg transition flex items-center justify-center gap-2 cursor-not-allowed";
+        warning.innerHTML = "<i class='fas fa-info-circle mr-1'></i> Lock configuration first.";
         warning.className = "text-xs text-amber-400/80 text-center mt-2";
-        warning.innerHTML = "<i class='fas fa-info-circle mr-1'></i> Lock teams first to enable matching.";
       }
     }
 
     // -----------------------------------------------------------------
-    // PHASE 2: MATCHUP SELECTION ROUTINES
+    // PHASE 2: MATCHUP SELECTION MANAGEMENT
     // -----------------------------------------------------------------
     function goToMatchupSelection() {
       clockState.activePage = 'matchupPage';
       saveStateToStorage();
-
       document.getElementById('setupPage').classList.add('hidden');
       document.getElementById('matchupPage').classList.remove('hidden');
 
@@ -577,17 +489,13 @@
       const selectB = document.getElementById('selectTeamB');
       const selectMatch = document.getElementById('selectMatchNumber');
 
-      selectA.innerHTML = '';
-      selectB.innerHTML = '';
-      selectMatch.innerHTML = '';
-
+      selectA.innerHTML = ''; selectB.innerHTML = ''; selectMatch.innerHTML = '';
       const teamKeys = Object.keys(configuration.teams);
-      teamKeys.forEach((team, idx) => {
-        const optA = new Option(team, team);
-        const optB = new Option(team, team);
-        if (idx === 1) optB.selected = true; 
 
-        selectA.add(optA);
+      teamKeys.forEach((team, idx) => {
+        selectA.add(new Option(team, team));
+        const optB = new Option(team, team);
+        if (idx === 1) optB.selected = true;
         selectB.add(optB);
       });
 
@@ -609,29 +517,13 @@
       const teamB = document.getElementById('selectTeamB').value;
       const matchLabel = document.getElementById('selectMatchNumber').value;
 
-      if (teamA === teamB) {
-        alert("A match requires two distinct team identities. Select different pairings.");
-        return;
-      }
+      if (teamA === teamB) return alert("Select two opposing distinct teams.");
 
       const preExistingMatch = globalHistoricalRegistry.find(m => m.matchLabel === matchLabel);
-      if (preExistingMatch) {
-        if (!confirm(`Historical performance entry logs for ${matchLabel} already exist in registry. Launching will wipe past record dataset. Continue?`)) {
-          return;
-        }
-        globalHistoricalRegistry = globalHistoricalRegistry.filter(m => m.matchLabel !== matchLabel);
-      }
+      if (preExistingMatch && !confirm(`Overwrite existing record metadata metrics for ${matchLabel}?`)) return;
+      if (preExistingMatch) globalHistoricalRegistry = globalHistoricalRegistry.filter(m => m.matchLabel !== matchLabel);
 
-      activeBout = {
-        teamAKey: teamA,
-        teamBKey: teamB,
-        matchLabel: matchLabel,
-        scoreA: 0,
-        scoreB: 0,
-        timeline: []
-      };
-
-      // Initialize persistent background timestamp clocks matrices
+      activeBout = { teamAKey: teamA, teamBKey: teamB, matchLabel: matchLabel, scoreA: 0, scoreB: 0, timeline: [] };
       clockState.isRunning = false;
       clockState.msRemainingWhenPaused = configuration.matchMinutes * 60 * 1000;
       clockState.expirationTimestamp = null;
@@ -639,19 +531,17 @@
 
       saveStateToStorage();
       hydrateTrackerUI();
-
       document.getElementById('matchupPage').classList.add('hidden');
       document.getElementById('trackerPage').classList.remove('hidden');
     }
 
     // -----------------------------------------------------------------
-    // PHASE 3: ABSOLUTE MILLISECOND CLOCK & CORE SYNCHRONIZER
+    // PHASE 3: METRIC COUNTER & BACKGROUND TRACKER SYSTEMS
     // -----------------------------------------------------------------
     function backToMatchup() {
       commitActiveBoutToHistory();
       clockState.activePage = 'matchupPage';
       saveStateToStorage();
-      
       document.getElementById('trackerPage').classList.add('hidden');
       document.getElementById('matchupPage').classList.remove('hidden');
     }
@@ -662,30 +552,22 @@
       document.getElementById('displayTeamBName').innerText = activeBout.teamBKey;
       document.getElementById('scoreA').innerText = activeBout.scoreA;
       document.getElementById('scoreB').innerText = activeBout.scoreB;
-      
       renderTimelineDOM();
       refreshUIClockDisplayStrings();
     }
 
     function calculateMsRemaining() {
-      if (!clockState.isRunning) {
-        return clockState.msRemainingWhenPaused;
-      }
-      const now = Date.now();
-      const delta = clockState.expirationTimestamp - now;
-      return Math.max(0, delta);
+      if (!clockState.isRunning) return clockState.msRemainingWhenPaused;
+      return Math.max(0, clockState.expirationTimestamp - Date.now());
     }
 
     function refreshUIClockDisplayStrings() {
       const msLeft = calculateMsRemaining();
       const totalSecondsLeft = Math.ceil(msLeft / 1000);
-      
       const mins = Math.floor(totalSecondsLeft / 60);
       const secs = totalSecondsLeft % 60;
       
-      document.getElementById('timerDisplay').innerText = 
-        `${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
-
+      document.getElementById('timerDisplay').innerText = `${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
       const runBtn = document.getElementById('startStopBtn');
       if (clockState.isRunning) {
         runBtn.innerText = "Stop";
@@ -697,17 +579,14 @@
     }
 
     function synchronizedClockTick() {
-      // Loop execution routine to keep calculations aligned
       if (clockState.activePage === 'trackerPage') {
         refreshUIClockDisplayStrings();
-        
-        // Auto termination flag engine check
         if (clockState.isRunning && Date.now() >= clockState.expirationTimestamp) {
           clockState.isRunning = false;
           clockState.msRemainingWhenPaused = 0;
           clockState.expirationTimestamp = null;
           saveStateToStorage();
-          alert(`Match time condition limit satisfied! ${activeBout.matchLabel} has officially completed!`);
+          alert(`Match time concluded for ${activeBout.matchLabel}!`);
           hydrateTrackerUI();
         }
       }
@@ -715,16 +594,11 @@
 
     function toggleTimer() {
       if (clockState.isRunning) {
-        // Pausing match operation sequence logic
-        const msLeft = clockState.expirationTimestamp - Date.now();
-        clockState.msRemainingWhenPaused = Math.max(0, msLeft);
+        clockState.msRemainingWhenPaused = Math.max(0, clockState.expirationTimestamp - Date.now());
         clockState.isRunning = false;
         clockState.expirationTimestamp = null;
       } else {
-        // Engaging core run sequence process execution
-        if (clockState.msRemainingWhenPaused <= 0) {
-          clockState.msRemainingWhenPaused = configuration.matchMinutes * 60 * 1000;
-        }
+        if (clockState.msRemainingWhenPaused <= 0) clockState.msRemainingWhenPaused = configuration.matchMinutes * 60 * 1000;
         clockState.expirationTimestamp = Date.now() + clockState.msRemainingWhenPaused;
         clockState.isRunning = true;
       }
@@ -741,89 +615,88 @@
     }
 
     // -----------------------------------------------------------------
-    // EVENT MODAL HANDLING AND SCORING EXTENSION MATRIX
+    // STATISTICAL ACTION COLLECTION LOGIC (GOAL & BLOCK)
     // -----------------------------------------------------------------
-    function triggerScorerModal(side) {
+    function triggerStatModal(side, statType) {
       targetActiveSide = side; 
-      const modal = document.getElementById('scorerModal');
+      currentModalStatType = statType;
+      
       const targetTeamKey = (side === 'A') ? activeBout.teamAKey : activeBout.teamBKey;
-      
-      document.getElementById('modalTitle').innerText = `Record Goal: ${targetTeamKey}`;
-      
-      const pSelect = document.getElementById('scorerSelect');
-      const aSelect = document.getElementById('assistSelect');
-      
-      pSelect.innerHTML = '';
-      aSelect.innerHTML = '';
+      document.getElementById('statModalTitle').innerText = `Log ${statType}: ${targetTeamKey}`;
+      document.getElementById('playerSelectLabel').innerText = `${statType} Player Name`;
 
-      const rosterList = configuration.teams[targetTeamKey] || [];
-      const safeRoster = rosterList.length > 0 ? rosterList : ["Solo Scorer"];
+      const pSelect = document.getElementById('playerSelect');
+      const aSelect = document.getElementById('assistSelect');
+      const assistWrapper = document.getElementById('assistSelectionWrapper');
+
+      pSelect.innerHTML = ''; aSelect.innerHTML = '';
+
+      const roster = configuration.teams[targetTeamKey] || [];
+      const safeRoster = roster.length > 0 ? roster : ["Solo Contender"];
 
       safeRoster.forEach(p => {
         pSelect.add(new Option(p, p));
         aSelect.add(new Option(p, p));
       });
 
-      const nullOpt = new Option("None (Solo Goal)", "None");
-      nullOpt.selected = true;
-      aSelect.insertBefore(nullOpt, aSelect.firstChild);
+      if (statType === 'Goal') {
+        assistWrapper.classList.remove('hidden');
+        const nullOpt = new Option("None (Solo Goal)", "None");
+        nullOpt.selected = true;
+        aSelect.insertBefore(nullOpt, aSelect.firstChild);
+      } else {
+        assistWrapper.classList.add('hidden'); // Hide assist options when recording a block
+      }
 
-      modal.classList.remove('hidden');
-      modal.classList.add('flex');
+      document.getElementById('statModal').className = "fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-50 p-4";
     }
 
-    function closeScorerModal() {
-      const modal = document.getElementById('scorerModal');
-      modal.classList.add('hidden');
-      modal.classList.remove('flex');
-    }
+    function closeStatModal() { document.getElementById('statModal').className = "hidden"; }
 
-    function submitGoalRecord() {
-      const scorer = document.getElementById('scorerSelect').value;
+    function submitStatRecord() {
+      const player = document.getElementById('playerSelect').value;
       const assist = document.getElementById('assistSelect').value;
       
       const msSpent = (configuration.matchMinutes * 60 * 1000) - calculateMsRemaining();
       const currentMinutes = Math.floor(msSpent / 60000);
       const timestampString = `${currentMinutes}'`;
+      const currentTeamKey = (targetActiveSide === 'A') ? activeBout.teamAKey : activeBout.teamBKey;
 
-      let logText = `⚽ Goal scored by <strong>${scorer}</strong>`;
-      if (assist !== "None") {
-        logText += ` (Assist: ${assist})`;
-      }
-
-      if (targetActiveSide === 'A') {
-        activeBout.scoreA++;
-        logText = `<span class="text-blue-400 font-semibold">[${activeBout.teamAKey}]</span> ` + logText;
+      let logText = "";
+      if (currentModalStatType === 'Goal') {
+        if (targetActiveSide === 'A') activeBout.scoreA++; else activeBout.scoreB++;
+        logText = `⚽ Goal by <strong>${player}</strong>${assist !== "None" ? ' (Assist: ' + assist + ')' : ''}`;
       } else {
-        activeBout.scoreB++;
-        logText = `<span class="text-rose-400 font-semibold">[${activeBout.teamBKey}]</span> ` + logText;
+        logText = `🛡️ Defensive Block by <strong>${player}</strong>`;
       }
+
+      const themedTeamLabel = `<span class="${targetActiveSide === 'A' ? 'text-blue-400' : 'text-rose-400'} font-semibold">[${currentTeamKey}]</span> `;
+      logText = themedTeamLabel + logText;
 
       activeBout.timeline.unshift({
         time: timestampString,
         text: logText,
-        team: targetActiveSide === 'A' ? activeBout.teamAKey : activeBout.teamBKey,
-        scorer: scorer,
-        assist: assist === "None" ? "" : assist
+        team: currentTeamKey,
+        type: currentModalStatType,
+        player: player,
+        assist: (currentModalStatType === 'Goal' && assist !== "None") ? assist : ""
       });
 
       saveStateToStorage();
       hydrateTrackerUI();
-      closeScorerModal();
+      closeStatModal();
     }
 
     function renderTimelineDOM() {
       const container = document.getElementById('timelineContainer');
       container.innerHTML = '';
-
       if (activeBout.timeline.length === 0) {
-        container.innerHTML = `<p class="text-slate-500 italic">No goals scored yet in this match.</p>`;
+        container.innerHTML = `<p class="text-slate-500 italic text-center py-4">No logged actions recorded yet.</p>`;
         return;
       }
-
       activeBout.timeline.forEach(evt => {
         const row = document.createElement('div');
-        row.className = "flex items-start gap-3 bg-[#0f172a]/60 p-2.5 rounded border border-slate-800/80";
+        row.className = "flex items-start gap-3 bg-[#0f172a]/60 p-2.5 rounded border border-slate-800";
         row.innerHTML = `
           <span class="bg-slate-800 border border-slate-700 px-2 py-0.5 rounded text-xs text-cyan-400 font-mono font-bold">${evt.time}</span>
           <div class="text-slate-200 text-sm leading-relaxed">${evt.text}</div>
@@ -842,82 +715,80 @@
 
     function openHistoryModal() {
       commitActiveBoutToHistory();
-      
       const tbody = document.getElementById('historyTableBody');
       tbody.innerHTML = '';
 
       if (globalHistoricalRegistry.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="5" class="p-8 text-center text-slate-500 italic">No matches recorded in history log yet.</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="5" class="p-8 text-center text-slate-500 italic">No matches archived in history log yet.</td></tr>`;
       } else {
         globalHistoricalRegistry.forEach(m => {
-          let eventsSummaryList = m.timeline.map(t => `[${t.time}] ${t.scorer}${t.assist ? ' (Asst: '+t.assist+')' : ''}`).join(', ');
-          if (!eventsSummaryList) eventsSummaryList = "No Scoring Incidents Recorded.";
+          let summary = m.timeline.map(t => `[${t.time}] ${t.type}: ${t.player}${t.assist ? ' (Asst: '+t.assist+')' : ''}`).join(', ');
+          if (!summary) summary = "No actions logged.";
 
           const tr = document.createElement('tr');
           tr.className = "hover:bg-slate-800/40 transition border-b border-slate-800/60";
           tr.innerHTML = `
             <td class="p-3 font-semibold text-cyan-400 whitespace-nowrap">${m.matchLabel}</td>
             <td class="p-3 text-blue-400 font-medium">${m.teamAKey}</td>
-            <td class="p-3 font-mono font-bold text-center text-lg bg-slate-900/40">${m.scoreA} - ${m.scoreB}</td>
+            <td class="p-3 font-mono font-bold text-center text-base bg-slate-900/40">${m.scoreA} - ${m.scoreB}</td>
             <td class="p-3 text-rose-400 font-medium">${m.teamBKey}</td>
-            <td class="p-3 text-xs text-slate-400 max-w-xs truncate" title="${eventsSummaryList}">${eventsSummaryList}</td>
+            <td class="p-3 text-xs text-slate-400 max-w-xs truncate" title="${summary}">${summary}</td>
           `;
           tbody.appendChild(tr);
         });
       }
-
-      const modal = document.getElementById('historyModal');
-      modal.classList.remove('hidden');
-      modal.classList.add('flex');
+      document.getElementById('historyModal').className = "fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-50 p-4";
     }
 
-    function closeHistoryModal() {
-      document.getElementById('historyModal').classList.add('hidden');
-    }
+    function closeHistoryModal() { document.getElementById('historyModal').className = "hidden"; }
 
+    // -----------------------------------------------------------------
+    // REAL-TIME EXCEL DEPLOYMENT EXPORT ENGINE (SHEETJS MATRIX)
+    // -----------------------------------------------------------------
     function exportToExcel() {
       commitActiveBoutToHistory();
-      if (globalHistoricalRegistry.length === 0) {
-        alert("There is currently no statistical match data available to export.");
-        return;
-      }
+      if (globalHistoricalRegistry.length === 0) return alert("There is no compiled data available to process.");
 
       const workbook = XLSX.utils.book_new();
-      const summaryDataMatrix = globalHistoricalRegistry.map(m => ({
-        "Match Number": m.matchLabel,
-        "Home Team (A)": m.teamAKey,
-        "Home Score": m.scoreA,
-        "Away Score": m.scoreB,
-        "Away Team (B)": m.teamBKey,
-        "Total Goal Events Logged": m.timeline.length
-      }));
-      const summarySheet = XLSX.utils.json_to_sheet(summaryDataMatrix);
-      XLSX.utils.book_append_sheet(workbook, summarySheet, "Tournament Overview");
 
-      const performanceLogs = [];
+      // PAGE 1 LAYOUT: MATCH OVERVIEW SUMMARY
+      const overviewData = globalHistoricalRegistry.map(m => ({
+        "Match Slot ID": m.matchLabel,
+        "Team Home (A)": m.teamAKey,
+        "Score A": m.scoreA,
+        "Score B": m.scoreB,
+        "Team Away (B)": m.teamBKey,
+        "Total Stats Tracked": m.timeline.length
+      }));
+      XLSX.utils.book_append_sheet(workbook, XLSX.utils.json_to_sheet(overviewData), "Tournament Summary");
+
+      // PAGE 2 LAYOUT: MATCH DATA MATRIX LOG (Structured exactly like requested layout grid)
+      const dynamicEventRows = [];
       globalHistoricalRegistry.forEach(m => {
         if (m.timeline.length === 0) {
-          performanceLogs.push({
+          dynamicEventRows.push({
             "Match Instance": m.matchLabel,
-            "Timestamp Reference": "N/A",
+            "Timestamp": "N/A",
             "Affiliated Team": "N/A",
-            "Scorer Name": "No Goals Scored",
-            "Assist Component": "N/A"
+            "Event Action Type": "No Events Recorded",
+            "Player Name": "",
+            "Assist Credit": ""
           });
         } else {
+          // Read chronologically from the start of the match onwards
           [...m.timeline].reverse().forEach(t => {
-            performanceLogs.push({
+            dynamicEventRows.push({
               "Match Instance": m.matchLabel,
-              "Timestamp Reference": t.time,
+              "Timestamp": t.time,
               "Affiliated Team": t.team,
-              "Scorer Name": t.scorer,
-              "Assist Component": t.assist || "Unassisted"
+              "Event Action Type": t.type.toUpperCase(),
+              "Player Name": t.player,
+              "Assist Credit": t.assist || "N/A"
             });
           });
         }
       });
-      const detailingSheet = XLSX.utils.json_to_sheet(performanceLogs);
-      XLSX.utils.book_append_sheet(workbook, detailingSheet, "Scoring Timeline Logs");
+      XLSX.utils.book_append_sheet(workbook, XLSX.utils.json_to_sheet(dynamicEventRows), "Match Actions Matrix");
 
       XLSX.writeFile(workbook, `Tournament_Performance_Registry.xlsx`);
     }
