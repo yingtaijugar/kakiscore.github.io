@@ -12,13 +12,13 @@
 
   <nav class="bg-[#1e293b] border-b border-slate-800 px-6 py-4 flex items-center justify-between shadow-md sticky top-0 z-40">
     <div class="flex items-center gap-2 text-emerald-400 font-bold text-xl tracking-tight select-none">
-      <i class="fas fa-trophy"></i> <span>ScoreTracker Pro</span>
+      <i class="fas fa-trophy text-amber-400"></i> <span>ScoreKeeper Pro</span>
     </div>
     <div class="flex items-center gap-3">
-      <button onclick="openHistoryModal()" class="bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-200 px-4 py-2 rounded-lg text-sm font-medium transition flex items-center gap-2">
+      <button onclick="openHistoryModal()" class="bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-200 px-4 py-2 rounded-lg text-sm font-medium transition flex items-center gap-2 cursor-pointer">
         <i class="fas fa-database text-cyan-400"></i> View Data
       </button>
-      <button onclick="exportToExcel()" class="bg-emerald-600 hover:bg-emerald-500 text-white px-4 py-2 rounded-lg text-sm font-medium transition shadow-md flex items-center gap-2">
+      <button onclick="exportToExcel()" class="bg-emerald-600 hover:bg-emerald-500 text-white px-4 py-2 rounded-lg text-sm font-medium transition shadow-md flex items-center gap-2 cursor-pointer">
         <i class="fas fa-file-excel"></i> Download Excel
       </button>
     </div>
@@ -26,8 +26,10 @@
 
   <div id="setupPage" class="max-w-4xl mx-auto px-4 py-8">
     <header class="text-center mb-8">
-      <h1 class="text-3xl font-bold text-slate-100 mb-1">Tournament Initialization</h1>
-      <p class="text-slate-400 text-sm">Configure your active teams and individual player rosters.</p>
+      <h1 class="text-4xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 to-cyan-400 mb-2">
+        Tournament Configuration
+      </h1>
+      <p class="text-slate-400">Configure your teams, players, and match settings.</p>
     </header>
 
     <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -42,8 +44,8 @@
               <input type="number" id="numTeamsInput" min="2" max="10" value="2" class="w-full bg-[#0f172a] border border-slate-600 rounded-lg px-4 py-2 focus:outline-none focus:border-emerald-500 transition">
             </div>
             <div class="flex items-end">
-              <button onclick="changeTeamCount()" class="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-medium px-4 py-2 rounded-lg transition shadow-md flex items-center justify-center gap-2">
-                <i class="fas fa-sync"></i> Update Team Layout
+              <button onclick="changeTeamCount()" class="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-medium px-4 py-2 rounded-lg transition shadow-md flex items-center justify-center gap-2 cursor-pointer">
+                <i class="fas fa-sync"></i> Update Layout
               </button>
             </div>
           </div>
@@ -52,7 +54,7 @@
         <div id="teamsContainer" class="space-y-4"></div>
         
         <div class="text-right">
-          <button onclick="lockAndConfirmTeams()" class="bg-cyan-600 hover:bg-cyan-500 text-white font-semibold px-6 py-3 rounded-lg transition shadow-lg flex items-center gap-2 ml-auto">
+          <button onclick="lockAndConfirmTeams()" class="bg-cyan-600 hover:bg-cyan-500 text-white font-semibold px-6 py-3 rounded-lg transition shadow-lg flex items-center gap-2 ml-auto cursor-pointer">
             <i class="fas fa-lock"></i> Confirm & Lock Teams
           </button>
         </div>
@@ -82,7 +84,7 @@
             <i class="fas fa-calendar-alt"></i> Decide Game
           </button>
           <p id="lockWarning" class="text-xs text-amber-400/80 text-center mt-2">
-            <i class="fas fa-info-circle mr-1"></i> Lock teams first to enable matching.
+            <i class="fas fa-info-circle mr-1"></i> Lock configurations to initialize fixtures.
           </p>
         </div>
       </div>
@@ -91,31 +93,31 @@
 
   <div id="matchupPage" class="max-w-2xl mx-auto px-4 py-12 hidden">
     <div class="bg-[#1e293b] p-8 rounded-2xl border border-slate-700 shadow-2xl text-center">
-      <h2 class="text-2xl font-bold text-cyan-400 mb-1">Fixture Configuration</h2>
-      <p class="text-slate-400 text-sm mb-8">Select the parameters for the upcoming bout.</p>
+      <h2 class="text-2xl font-bold text-cyan-400 mb-1">Fixture Dashboard</h2>
+      <p class="text-slate-400 text-sm mb-8">Set up the pairings for the upcoming round.</p>
 
       <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 items-center mb-8">
         <div class="bg-[#0f172a] p-4 rounded-xl border border-slate-700">
-          <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Team A</label>
+          <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Home Team (A)</label>
           <select id="selectTeamA" class="w-full bg-[#1e293b] border border-slate-600 rounded-lg p-2 text-center text-blue-400 font-semibold focus:outline-none"></select>
         </div>
         <div class="text-xl font-bold text-slate-500 uppercase tracking-widest py-2">vs</div>
         <div class="bg-[#0f172a] p-4 rounded-xl border border-slate-700">
-          <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Team B</label>
+          <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Away Team (B)</label>
           <select id="selectTeamB" class="w-full bg-[#1e293b] border border-slate-600 rounded-lg p-2 text-center text-rose-400 font-semibold focus:outline-none"></select>
         </div>
       </div>
 
       <div class="w-32 mx-auto mb-8">
-        <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Match Slot</label>
+        <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Round Slot</label>
         <select id="selectMatchNumber" class="w-full bg-[#0f172a] border border-slate-600 rounded-lg p-2 text-center text-slate-200 focus:outline-none"></select>
       </div>
 
       <div class="flex gap-4">
-        <button onclick="backToSetup()" class="w-1/2 bg-slate-700 hover:bg-slate-600 text-white font-semibold py-3 rounded-lg transition flex items-center justify-center gap-2">
-          <i class="fas fa-arrow-left"></i> Back to Setup
+        <button onclick="backToSetup()" class="w-1/2 bg-slate-700 hover:bg-slate-600 text-white font-semibold py-3 rounded-lg transition flex items-center justify-center gap-2 cursor-pointer">
+          <i class="fas fa-arrow-left"></i> Setup Configuration
         </button>
-        <button onclick="launchLiveMatch()" class="w-1/2 bg-gradient-to-r from-emerald-600 to-cyan-600 hover:from-emerald-500 hover:to-cyan-500 text-white font-bold py-3 rounded-lg transition shadow-lg flex items-center justify-center gap-2">
+        <button onclick="launchLiveMatch()" class="w-1/2 bg-gradient-to-r from-emerald-600 to-cyan-600 hover:from-emerald-500 hover:to-cyan-500 text-white font-bold py-3 rounded-lg transition shadow-lg flex items-center justify-center gap-2 cursor-pointer">
           OK <i class="fas fa-play"></i>
         </button>
       </div>
@@ -124,8 +126,8 @@
 
   <div id="trackerPage" class="hidden max-w-4xl mx-auto px-4 py-8 space-y-6">
     <div class="flex items-center justify-between">
-      <button onclick="backToMatchup()" class="text-slate-400 hover:text-white transition px-3 py-1.5 rounded-lg border border-slate-700 hover:bg-slate-800 text-sm flex items-center gap-1.5">
-        <i class="fas fa-chevron-left"></i> Back to Matchup
+      <button onclick="backToMatchup()" class="text-slate-400 hover:text-white transition px-3 py-1.5 rounded-lg border border-slate-700 hover:bg-slate-800 text-sm flex items-center gap-1.5 cursor-pointer">
+        <i class="fas fa-chevron-left"></i> Change Matchup
       </button>
       <div id="matchLabelDisplay" class="bg-cyan-950 text-cyan-400 border border-cyan-800 text-xs font-bold px-3 py-1 rounded-full uppercase tracking-widest">Game 1</div>
     </div>
@@ -133,8 +135,8 @@
     <div class="bg-[#1e293b] border border-slate-700 rounded-2xl p-6 text-center max-w-md mx-auto shadow-xl">
       <div id="timerDisplay" class="text-6xl font-mono font-bold text-slate-100 tracking-wider mb-3 select-none">25:00</div>
       <div class="flex justify-center gap-3">
-        <button id="startStopBtn" onclick="toggleTimer()" class="bg-emerald-500 hover:bg-emerald-400 text-[#0f172a] font-bold px-6 py-2 rounded-lg shadow-md transition uppercase tracking-wider text-sm">Start</button>
-        <button onclick="resetTimer()" class="bg-slate-700 hover:bg-slate-600 text-slate-300 font-medium px-4 py-2 rounded-lg transition text-sm">Reset Clock</button>
+        <button id="startStopBtn" onclick="toggleTimer()" class="bg-emerald-500 hover:bg-emerald-400 text-[#0f172a] font-bold px-6 py-2 rounded-lg shadow-md transition uppercase tracking-wider text-sm cursor-pointer">Start</button>
+        <button onclick="resetTimer()" class="bg-slate-700 hover:bg-slate-600 text-slate-300 font-medium px-4 py-2 rounded-lg transition text-sm cursor-pointer">Reset Clock</button>
       </div>
     </div>
 
@@ -145,10 +147,10 @@
           <div id="scoreA" class="text-8xl font-black text-slate-100 my-4 select-none">0</div>
         </div>
         <div class="grid grid-cols-2 gap-2 mt-2">
-          <button onclick="triggerStatModal('A', 'Goal')" class="bg-blue-600 hover:bg-blue-500 text-white font-bold py-3 rounded-lg transition text-sm flex items-center justify-center gap-1.5 shadow">
+          <button onclick="triggerStatModal('A', 'Goal')" class="bg-blue-600 hover:bg-blue-500 text-white font-bold py-3 rounded-lg transition text-sm flex items-center justify-center gap-1.5 shadow cursor-pointer">
             <i class="fas fa-plus-circle"></i> + GOAL
           </button>
-          <button onclick="triggerStatModal('A', 'Block')" class="bg-slate-700 hover:bg-slate-600 text-slate-200 font-semibold py-3 rounded-lg transition text-sm flex items-center justify-center gap-1.5 border border-slate-600">
+          <button onclick="triggerStatModal('A', 'Block')" class="bg-slate-700 hover:bg-slate-600 text-slate-200 font-semibold py-3 rounded-lg transition text-sm flex items-center justify-center gap-1.5 border border-slate-600 cursor-pointer">
             <i class="fas fa-shield-alt text-blue-400"></i> + BLOCK
           </button>
         </div>
@@ -160,10 +162,10 @@
           <div id="scoreB" class="text-8xl font-black text-slate-100 my-4 select-none">0</div>
         </div>
         <div class="grid grid-cols-2 gap-2 mt-2">
-          <button onclick="triggerStatModal('B', 'Goal')" class="bg-rose-600 hover:bg-rose-500 text-white font-bold py-3 rounded-lg transition text-sm flex items-center justify-center gap-1.5 shadow">
+          <button onclick="triggerStatModal('B', 'Goal')" class="bg-rose-600 hover:bg-rose-500 text-white font-bold py-3 rounded-lg transition text-sm flex items-center justify-center gap-1.5 shadow cursor-pointer">
             <i class="fas fa-plus-circle"></i> + GOAL
           </button>
-          <button onclick="triggerStatModal('B', 'Block')" class="bg-slate-700 hover:bg-slate-600 text-slate-200 font-semibold py-3 rounded-lg transition text-sm flex items-center justify-center gap-1.5 border border-slate-600">
+          <button onclick="triggerStatModal('B', 'Block')" class="bg-slate-700 hover:bg-slate-600 text-slate-200 font-semibold py-3 rounded-lg transition text-sm flex items-center justify-center gap-1.5 border border-slate-600 cursor-pointer">
             <i class="fas fa-shield-alt text-rose-400"></i> + BLOCK
           </button>
         </div>
@@ -172,7 +174,7 @@
 
     <div class="bg-[#1e293b] border border-slate-700 rounded-xl p-5 shadow-lg">
       <h4 class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-3 flex items-center gap-2">
-        <i class="fas fa-stream text-cyan-400"></i> Match Statistics Timeline (Real-Time Feed)
+        <i class="fas fa-stream text-cyan-400"></i> Live Action Metric Timeline
       </h4>
       <div id="timelineContainer" class="space-y-2 max-h-48 overflow-y-auto pr-2 text-sm"></div>
     </div>
@@ -180,7 +182,7 @@
 
   <div id="statModal" class="fixed inset-0 bg-black/70 backdrop-blur-sm hidden items-center justify-center z-50 p-4">
     <div class="bg-[#1e293b] border border-slate-700 rounded-xl max-w-md w-full p-6 shadow-2xl relative">
-      <h3 id="statModalTitle" class="text-xl font-bold text-slate-100 mb-4">Record Performance</h3>
+      <h3 id="statModalTitle" class="text-xl font-bold text-slate-100 mb-4">Record Performance Action</h3>
       <div class="space-y-4 mb-6">
         <div>
           <label id="playerSelectLabel" class="block text-xs font-semibold text-slate-400 uppercase mb-1.5">Player Name</label>
@@ -192,18 +194,18 @@
         </div>
       </div>
       <div class="flex gap-3">
-        <button onclick="closeStatModal()" class="w-1/2 bg-slate-700 hover:bg-slate-600 text-slate-200 font-medium py-2 rounded-lg transition">Cancel</button>
-        <button onclick="submitStatRecord()" class="w-1/2 bg-emerald-600 hover:bg-emerald-500 text-white font-semibold py-2 rounded-lg transition shadow-md">Confirm Action</button>
+        <button onclick="closeStatModal()" class="w-1/2 bg-slate-700 hover:bg-slate-600 text-slate-200 font-medium py-2 rounded-lg transition cursor-pointer">Cancel</button>
+        <button onclick="submitStatRecord()" class="w-1/2 bg-emerald-600 hover:bg-emerald-500 text-white font-semibold py-2 rounded-lg transition shadow-md cursor-pointer">Save Stats</button>
       </div>
     </div>
   </div>
 
   <div id="rosterModal" class="fixed inset-0 bg-black/70 backdrop-blur-sm hidden items-center justify-center z-50 p-4">
     <div class="bg-[#1e293b] border border-slate-700 rounded-xl max-w-md w-full p-6 shadow-2xl relative">
-      <h3 id="rosterModalTitle" class="text-xl font-bold text-slate-100 mb-2">Team Roster</h3>
-      <p class="text-xs text-slate-400 mb-4">Manage or view current team selection.</p>
+      <h3 id="rosterModalTitle" class="text-xl font-bold text-slate-100 mb-2">Roster Roster</h3>
+      <p class="text-xs text-slate-400 mb-4">Review registered squad members configuration.</p>
       <div id="rosterModalList" class="space-y-2 max-h-64 overflow-y-auto mb-6 bg-[#0f172a] p-3 rounded-lg border border-slate-800"></div>
-      <button onclick="closeRosterModal()" class="w-full bg-slate-700 hover:bg-slate-600 text-slate-200 font-medium py-2.5 rounded-lg transition">Close</button>
+      <button onclick="closeRosterModal()" class="w-full bg-slate-700 hover:bg-slate-600 text-slate-200 font-medium py-2.5 rounded-lg transition cursor-pointer">Close</button>
     </div>
   </div>
 
@@ -211,9 +213,9 @@
     <div class="bg-[#1e293b] border border-slate-700 rounded-2xl max-w-3xl w-full p-6 shadow-2xl flex flex-col max-h-[85vh]">
       <div class="flex items-center justify-between mb-4 border-b border-slate-700 pb-3">
         <h3 class="text-xl font-bold text-slate-100 flex items-center gap-2">
-          <i class="fas fa-history text-cyan-400"></i> Match History Registry
+          <i class="fas fa-history text-cyan-400"></i> Match Statistics Registry History
         </h3>
-        <button onclick="closeHistoryModal()" class="text-slate-400 hover:text-white transition text-xl"><i class="fas fa-times"></i></button>
+        <button onclick="closeHistoryModal()" class="text-slate-400 hover:text-white transition text-xl cursor-pointer"><i class="fas fa-times"></i></button>
       </div>
       
       <div class="overflow-auto flex-1 rounded-lg border border-slate-800 bg-[#0f172a]">
@@ -224,7 +226,7 @@
               <th class="p-3">Home Team</th>
               <th class="p-3 text-center">Score</th>
               <th class="p-3">Away Team</th>
-              <th class="p-3">Event Detail Actions Log</th>
+              <th class="p-3">Action Stream Overview Summary</th>
             </tr>
           </thead>
           <tbody id="historyTableBody" class="text-sm divide-y divide-slate-800 text-slate-300"></tbody>
@@ -232,10 +234,10 @@
       </div>
 
       <div class="mt-4 pt-3 border-t border-slate-700 flex justify-between">
-        <button onclick="clearAllStoredData()" class="bg-rose-900/40 hover:bg-rose-900 text-rose-300 border border-rose-700/60 font-medium px-4 py-2 rounded-lg text-sm transition">
+        <button onclick="clearAllStoredData()" class="bg-rose-900/40 hover:bg-rose-900 text-rose-300 border border-rose-700/60 font-medium px-4 py-2 rounded-lg text-sm transition cursor-pointer">
           <i class="fas fa-trash-alt mr-1"></i> Factory Wipe Data
         </button>
-        <button onclick="closeHistoryModal()" class="bg-slate-700 hover:bg-slate-600 text-slate-200 px-5 py-2 rounded-lg text-sm font-medium transition">Close Registry</button>
+        <button onclick="closeHistoryModal()" class="bg-slate-700 hover:bg-slate-600 text-slate-200 px-5 py-2 rounded-lg text-sm font-medium transition cursor-pointer">Close Registry</button>
       </div>
     </div>
   </div>
@@ -249,7 +251,7 @@
     let clockState = { isRunning: false, msRemainingWhenPaused: 1500 * 1000, expirationTimestamp: null, activePage: 'setupPage' };
 
     let targetActiveSide = null; 
-    let currentModalStatType = 'Goal'; // 'Goal' or 'Block'
+    let currentModalStatType = 'Goal'; 
     let workingTeamsCount = 2;
 
     window.addEventListener('DOMContentLoaded', () => {
@@ -302,14 +304,14 @@
     }
 
     function clearAllStoredData() {
-      if (confirm("Wipe all tournament logs, metadata, and cache structures clean?")) {
+      if (confirm("Wipe all localized historical registry tables and system cache states clear?")) {
         localStorage.clear();
         location.reload();
       }
     }
 
     // -----------------------------------------------------------------
-    // PHASE 1: COMPONENT-BASED ROSTER BUILDER DESIGN
+    // PHASE 1: CONFIGURATION ROSTER ENGINE
     // -----------------------------------------------------------------
     function changeTeamCount() {
       workingTeamsCount = parseInt(document.getElementById('numTeamsInput').value) || 2;
@@ -332,19 +334,19 @@
           <div class="absolute left-0 top-0 bottom-0 w-1 bg-gradient-to-b from-cyan-500 to-blue-600"></div>
           <div class="flex flex-col md:flex-row gap-4 items-start md:items-center justify-between pb-3 border-b border-slate-700/50">
             <div class="w-full md:w-1/2">
-              <label class="block text-xs font-bold text-slate-400 uppercase tracking-wide mb-1">Team ${i} Identity Name</label>
+              <label class="block text-xs font-bold text-slate-400 uppercase tracking-wide mb-1">Team ${i} Name Profile</label>
               <input type="text" id="teamName_${i}" class="team-name-field w-full bg-[#0f172a] border border-slate-600 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-cyan-500 text-slate-200 font-semibold" value="${fallbackName}">
             </div>
             <div class="flex items-center gap-2 mt-4 md:mt-0">
-              <button onclick="displayRosterOverview(${i})" class="bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-300 text-xs px-3 py-2 rounded-lg font-medium transition flex items-center gap-1.5">
-                <i class="fas fa-users text-cyan-400"></i> View Members (<span id="rosterCountLabel_${i}">0</span>)
+              <button onclick="displayRosterOverview(${i})" class="bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-300 text-xs px-3 py-2 rounded-lg font-medium transition flex items-center gap-1.5 cursor-pointer">
+                <i class="fas fa-users text-cyan-400"></i> Roster (<span id="rosterCountLabel_${i}">0</span>)
               </button>
             </div>
           </div>
           <div class="bg-[#0f172a]/40 p-3 rounded-lg border border-slate-800/80 flex gap-2 items-center">
-            <input type="text" id="memberIn_${i}" placeholder="Enter individual player name..." class="w-full bg-[#0f172a] border border-slate-700 rounded-lg px-3 py-1.5 text-xs text-slate-300 focus:outline-none focus:border-emerald-500">
-            <button onclick="appendPlayerItemToList(${i})" class="bg-emerald-600 hover:bg-emerald-500 text-white p-2 rounded-lg text-xs font-bold aspect-square flex items-center justify-center transition shadow"><i class="fas fa-plus"></i></button>
-            <button onclick="triggerRosterDeletionLayout(${i})" class="bg-rose-900/30 hover:bg-rose-900/60 border border-rose-800/50 text-rose-400 p-2 rounded-lg text-xs font-bold aspect-square flex items-center justify-center transition"><i class="fas fa-minus"></i></button>
+            <input type="text" id="memberIn_${i}" placeholder="Type unique player name label..." class="w-full bg-[#0f172a] border border-slate-700 rounded-lg px-3 py-1.5 text-xs text-slate-300 focus:outline-none focus:border-emerald-500">
+            <button onclick="appendPlayerItemToList(${i})" class="bg-emerald-600 hover:bg-emerald-500 text-white p-2 rounded-lg text-xs font-bold aspect-square flex items-center justify-center transition shadow cursor-pointer"><i class="fas fa-plus"></i></button>
+            <button onclick="triggerRosterDeletionLayout(${i})" class="bg-rose-900/30 hover:bg-rose-900/60 border border-rose-800/50 text-rose-400 p-2 rounded-lg text-xs font-bold aspect-square flex items-center justify-center transition cursor-pointer"><i class="fas fa-minus"></i></button>
           </div>
         `;
         container.appendChild(card);
@@ -367,11 +369,11 @@
       const teamKey = nameInput.value.trim();
       const playerVal = memberInput.value.trim();
 
-      if (!teamKey) return alert("Set a Team Name first.");
+      if (!teamKey) return alert("Initialize Team Name profile parameters prior to assignment.");
       if (!playerVal) return;
 
       if (!configuration.teams[teamKey]) configuration.teams[teamKey] = [];
-      if (configuration.teams[teamKey].includes(playerVal)) return alert("Player already listed.");
+      if (configuration.teams[teamKey].includes(playerVal)) return alert("Specified registration target already exists on squad.");
 
       configuration.teams[teamKey].push(playerVal);
       memberInput.value = '';
@@ -383,12 +385,12 @@
       const nameInput = document.getElementById(`teamName_${teamIndex}`);
       const teamKey = nameInput.value.trim();
       const listContainer = document.getElementById('rosterModalList');
-      document.getElementById('rosterModalTitle').innerText = `${teamKey || 'Unassigned'} Roster`;
+      document.getElementById('rosterModalTitle').innerText = `${teamKey || 'Unset'} Squad configuration`;
       listContainer.innerHTML = '';
 
       const players = configuration.teams[teamKey] || [];
       if (players.length === 0) {
-        listContainer.innerHTML = `<p class="text-slate-500 italic text-center py-4 text-xs">No members signed up yet.</p>`;
+        listContainer.innerHTML = `<p class="text-slate-500 italic text-center py-4 text-xs">No personnel elements defined.</p>`;
       } else {
         players.forEach(p => {
           const block = document.createElement('div');
@@ -404,19 +406,19 @@
       const nameInput = document.getElementById(`teamName_${teamIndex}`);
       const teamKey = nameInput.value.trim();
       const listContainer = document.getElementById('rosterModalList');
-      document.getElementById('rosterModalTitle').innerText = `Manage: ${teamKey}`;
+      document.getElementById('rosterModalTitle').innerText = `Prune: ${teamKey}`;
       listContainer.innerHTML = '';
 
       const players = configuration.teams[teamKey] || [];
       if (players.length === 0) {
-        listContainer.innerHTML = `<p class="text-slate-500 italic text-center py-4 text-xs">No members to remove.</p>`;
+        listContainer.innerHTML = `<p class="text-slate-500 italic text-center py-4 text-xs">Roster is empty.</p>`;
       } else {
         players.forEach((p, idx) => {
           const block = document.createElement('div');
           block.className = "flex items-center justify-between text-slate-300 text-xs p-1.5 bg-slate-900/50 rounded border border-slate-800";
           block.innerHTML = `
             <span><i class="fas fa-user text-slate-500 mr-2"></i>${p}</span>
-            <button onclick="deleteSingleRosterMember('${teamKey}', ${idx}, ${teamIndex})" class="bg-rose-950 hover:bg-rose-900 border border-rose-800 text-rose-300 text-[10px] px-2 py-1 rounded transition">Remove</button>
+            <button onclick="deleteSingleRosterMember('${teamKey}', ${idx}, ${teamIndex})" class="bg-rose-950 hover:bg-rose-900 border border-rose-800 text-rose-300 text-[10px] px-2 py-1 rounded transition cursor-pointer">Delete</button>
           `;
           listContainer.appendChild(block);
         });
@@ -449,15 +451,15 @@
           input.classList.remove('border-rose-500');
           const lookupOldKey = Object.keys(configuration.teams)[index] || name;
           synchronizedTeamsObj[name] = configuration.teams[lookupOldKey] || configuration.teams[name] || [];
-          if (synchronizedTeamsObj[name].length === 0) synchronizedTeamsObj[name].push("Solo Contender");
+          if (synchronizedTeamsObj[name].length === 0) synchronizedTeamsObj[name].push("Solo Player");
         }
       });
 
-      if (!valid) return alert("Ensure all fields have an identifier name.");
+      if (!valid) return alert("Ensure all structural squad components carry designated alphanumeric labels.");
       configuration.teams = synchronizedTeamsObj;
       saveStateToStorage();
       enableDecideGame(true);
-      alert("All configurations locked! Match creation dashboards enabled.");
+      alert("All parameters localized successfully. Match selection engine active.");
     }
 
     function enableDecideGame(status) {
@@ -466,18 +468,18 @@
       if (status) {
         btn.disabled = false;
         btn.className = "w-full bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500 text-white font-bold py-3 rounded-lg transition shadow-md flex items-center justify-center gap-2 cursor-pointer";
-        warning.innerHTML = "<i class='fas fa-check-circle mr-1'></i> Configurations active.";
+        warning.innerHTML = "<i class='fas fa-check-circle mr-1'></i> Settings locked.";
         warning.className = "text-xs text-emerald-400 text-center mt-2 font-medium";
       } else {
         btn.disabled = true;
         btn.className = "w-full bg-slate-600 text-slate-400 font-bold py-3 rounded-lg transition flex items-center justify-center gap-2 cursor-not-allowed";
-        warning.innerHTML = "<i class='fas fa-info-circle mr-1'></i> Lock configuration first.";
+        warning.innerHTML = "<i class='fas fa-info-circle mr-1'></i> Lock configurations to initialize fixtures.";
         warning.className = "text-xs text-amber-400/80 text-center mt-2";
       }
     }
 
     // -----------------------------------------------------------------
-    // PHASE 2: MATCHUP SELECTION MANAGEMENT
+    // PHASE 2: FIXTURE MATRIX TRACKING
     // -----------------------------------------------------------------
     function goToMatchupSelection() {
       clockState.activePage = 'matchupPage';
@@ -517,13 +519,17 @@
       const teamB = document.getElementById('selectTeamB').value;
       const matchLabel = document.getElementById('selectMatchNumber').value;
 
-      if (teamA === teamB) return alert("Select two opposing distinct teams.");
+      if (teamA === teamB) return alert("A match requires two distinct team identities. Select different pairings.");
 
       const preExistingMatch = globalHistoricalRegistry.find(m => m.matchLabel === matchLabel);
-      if (preExistingMatch && !confirm(`Overwrite existing record metadata metrics for ${matchLabel}?`)) return;
+      if (preExistingMatch && !confirm(`Historical performance entry logs for ${matchLabel} already exist. Overwrite file mapping elements?`)) return;
       if (preExistingMatch) globalHistoricalRegistry = globalHistoricalRegistry.filter(m => m.matchLabel !== matchLabel);
 
       activeBout = { teamAKey: teamA, teamBKey: teamB, matchLabel: matchLabel, scoreA: 0, scoreB: 0, timeline: [] };
+      
+      // --- FIXED: Explicitly sync configurations configuration array state directly on launch ---
+      configuration.matchMinutes = parseInt(document.getElementById('matchMinutes').value) || 25;
+      
       clockState.isRunning = false;
       clockState.msRemainingWhenPaused = configuration.matchMinutes * 60 * 1000;
       clockState.expirationTimestamp = null;
@@ -536,7 +542,7 @@
     }
 
     // -----------------------------------------------------------------
-    // PHASE 3: METRIC COUNTER & BACKGROUND TRACKER SYSTEMS
+    // PHASE 3: METRIC SYSTEM COUNTERS
     // -----------------------------------------------------------------
     function backToMatchup() {
       commitActiveBoutToHistory();
@@ -571,10 +577,10 @@
       const runBtn = document.getElementById('startStopBtn');
       if (clockState.isRunning) {
         runBtn.innerText = "Stop";
-        runBtn.className = "bg-rose-500 hover:bg-rose-400 text-white font-bold px-6 py-2 rounded-lg shadow-md transition uppercase tracking-wider text-sm";
+        runBtn.className = "bg-rose-500 hover:bg-rose-400 text-white font-bold px-6 py-2 rounded-lg shadow-md transition uppercase tracking-wider text-sm cursor-pointer";
       } else {
         runBtn.innerText = "Start";
-        runBtn.className = "bg-emerald-500 hover:bg-emerald-400 text-[#0f172a] font-bold px-6 py-2 rounded-lg shadow-md transition uppercase tracking-wider text-sm";
+        runBtn.className = "bg-emerald-500 hover:bg-emerald-400 text-[#0f172a] font-bold px-6 py-2 rounded-lg shadow-md transition uppercase tracking-wider text-sm cursor-pointer";
       }
     }
 
@@ -586,7 +592,7 @@
           clockState.msRemainingWhenPaused = 0;
           clockState.expirationTimestamp = null;
           saveStateToStorage();
-          alert(`Match time concluded for ${activeBout.matchLabel}!`);
+          alert(`Regulation play window expired for active assignment: ${activeBout.matchLabel}`);
           hydrateTrackerUI();
         }
       }
@@ -615,7 +621,7 @@
     }
 
     // -----------------------------------------------------------------
-    // STATISTICAL ACTION COLLECTION LOGIC (GOAL & BLOCK)
+    // LOG MODAL INTERACTION CONTROLLERS
     // -----------------------------------------------------------------
     function triggerStatModal(side, statType) {
       targetActiveSide = side; 
@@ -632,7 +638,7 @@
       pSelect.innerHTML = ''; aSelect.innerHTML = '';
 
       const roster = configuration.teams[targetTeamKey] || [];
-      const safeRoster = roster.length > 0 ? roster : ["Solo Contender"];
+      const safeRoster = roster.length > 0 ? roster : ["Solo Player"];
 
       safeRoster.forEach(p => {
         pSelect.add(new Option(p, p));
@@ -641,11 +647,11 @@
 
       if (statType === 'Goal') {
         assistWrapper.classList.remove('hidden');
-        const nullOpt = new Option("None (Solo Goal)", "None");
+        const nullOpt = new Option("Unassisted", "Unassisted");
         nullOpt.selected = true;
         aSelect.insertBefore(nullOpt, aSelect.firstChild);
       } else {
-        assistWrapper.classList.add('hidden'); // Hide assist options when recording a block
+        assistWrapper.classList.add('hidden');
       }
 
       document.getElementById('statModal').className = "fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-50 p-4";
@@ -665,7 +671,7 @@
       let logText = "";
       if (currentModalStatType === 'Goal') {
         if (targetActiveSide === 'A') activeBout.scoreA++; else activeBout.scoreB++;
-        logText = `⚽ Goal by <strong>${player}</strong>${assist !== "None" ? ' (Assist: ' + assist + ')' : ''}`;
+        logText = `⚽ Goal by <strong>${player}</strong>${assist !== "Unassisted" ? ' (Assist: ' + assist + ')' : ''}`;
       } else {
         logText = `🛡️ Defensive Block by <strong>${player}</strong>`;
       }
@@ -679,7 +685,7 @@
         team: currentTeamKey,
         type: currentModalStatType,
         player: player,
-        assist: (currentModalStatType === 'Goal' && assist !== "None") ? assist : ""
+        assist: (currentModalStatType === 'Goal' && assist !== "Unassisted") ? assist : ""
       });
 
       saveStateToStorage();
@@ -691,7 +697,7 @@
       const container = document.getElementById('timelineContainer');
       container.innerHTML = '';
       if (activeBout.timeline.length === 0) {
-        container.innerHTML = `<p class="text-slate-500 italic text-center py-4">No logged actions recorded yet.</p>`;
+        container.innerHTML = `<p class="text-slate-500 italic text-center py-4">No performance statistics registered down the timeline loop.</p>`;
         return;
       }
       activeBout.timeline.forEach(evt => {
@@ -719,11 +725,11 @@
       tbody.innerHTML = '';
 
       if (globalHistoricalRegistry.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="5" class="p-8 text-center text-slate-500 italic">No matches archived in history log yet.</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="5" class="p-8 text-center text-slate-500 italic">No historical matches saved.</td></tr>`;
       } else {
         globalHistoricalRegistry.forEach(m => {
           let summary = m.timeline.map(t => `[${t.time}] ${t.type}: ${t.player}${t.assist ? ' (Asst: '+t.assist+')' : ''}`).join(', ');
-          if (!summary) summary = "No actions logged.";
+          if (!summary) summary = "No entries logged.";
 
           const tr = document.createElement('tr');
           tr.className = "hover:bg-slate-800/40 transition border-b border-slate-800/60";
@@ -743,52 +749,54 @@
     function closeHistoryModal() { document.getElementById('historyModal').className = "hidden"; }
 
     // -----------------------------------------------------------------
-    // REAL-TIME EXCEL DEPLOYMENT EXPORT ENGINE (SHEETJS MATRIX)
+    // REAL-TIME ACTIONS EXCEL BUILDER SPREADSHEET ENGINE
     // -----------------------------------------------------------------
     function exportToExcel() {
       commitActiveBoutToHistory();
-      if (globalHistoricalRegistry.length === 0) return alert("There is no compiled data available to process.");
+      if (globalHistoricalRegistry.length === 0) return alert("Historical data arrays are empty. Perform logging sequence before export processing.");
 
       const workbook = XLSX.utils.book_new();
 
-      // PAGE 1 LAYOUT: MATCH OVERVIEW SUMMARY
-      const overviewData = globalHistoricalRegistry.map(m => ({
-        "Match Slot ID": m.matchLabel,
-        "Team Home (A)": m.teamAKey,
-        "Score A": m.scoreA,
-        "Score B": m.scoreB,
-        "Team Away (B)": m.teamBKey,
-        "Total Stats Tracked": m.timeline.length
+      // TAB ONE: GENERAL TOURNAMENT ROUNDS OVERVIEW SUMMARY
+      const summaryDataMatrix = globalHistoricalRegistry.map(m => ({
+        "Match Number": m.matchLabel,
+        "Home Team (A)": m.teamAKey,
+        "Home Score": m.scoreA,
+        "Away Score": m.scoreB,
+        "Away Team (B)": m.teamBKey,
+        "Total Live Actions Logged": m.timeline.length
       }));
-      XLSX.utils.book_append_sheet(workbook, XLSX.utils.json_to_sheet(overviewData), "Tournament Summary");
+      const summarySheet = XLSX.utils.json_to_sheet(summaryDataMatrix);
+      XLSX.utils.book_append_sheet(workbook, summarySheet, "Tournament Overview");
 
-      // PAGE 2 LAYOUT: MATCH DATA MATRIX LOG (Structured exactly like requested layout grid)
-      const dynamicEventRows = [];
+      // TAB TWO: REAL-TIME INDIVIDUAL MATRICES FEEDS (Structured matching tabular design layout)
+      const performanceLogs = [];
       globalHistoricalRegistry.forEach(m => {
         if (m.timeline.length === 0) {
-          dynamicEventRows.push({
+          performanceLogs.push({
             "Match Instance": m.matchLabel,
-            "Timestamp": "N/A",
+            "Timestamp Reference": "N/A",
             "Affiliated Team": "N/A",
-            "Event Action Type": "No Events Recorded",
-            "Player Name": "",
-            "Assist Credit": ""
+            "Event Action Type": "No Performance Tracked",
+            "Player Name": "N/A",
+            "Assist Credit": "N/A"
           });
         } else {
-          // Read chronologically from the start of the match onwards
+          // Parse events chronologically from game opening kickoff forward
           [...m.timeline].reverse().forEach(t => {
-            dynamicEventRows.push({
+            performanceLogs.push({
               "Match Instance": m.matchLabel,
-              "Timestamp": t.time,
+              "Timestamp Reference": t.time,
               "Affiliated Team": t.team,
-              "Event Action Type": t.type.toUpperCase(),
+              "Event Action Type": t.type ? t.type.toUpperCase() : "GOAL",
               "Player Name": t.player,
-              "Assist Credit": t.assist || "N/A"
+              "Assist Credit": t.assist || "Unassisted"
             });
           });
         }
       });
-      XLSX.utils.book_append_sheet(workbook, XLSX.utils.json_to_sheet(dynamicEventRows), "Match Actions Matrix");
+      const detailingSheet = XLSX.utils.json_to_sheet(performanceLogs);
+      XLSX.utils.book_append_sheet(workbook, detailingSheet, "Live Actions Log Matrix");
 
       XLSX.writeFile(workbook, `Tournament_Performance_Registry.xlsx`);
     }
