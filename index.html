@@ -662,7 +662,6 @@
         inp.classList.remove('border-rose-500');
         const oldKey=Object.keys(configuration.teams)[idx]||name;
         newTeams[name]=configuration.teams[oldKey]||configuration.teams[name]||[];
-        if(!newTeams[name].length) newTeams[name].push("Solo Player");
       }
     });
     if(!valid) return alert(t('alertNoTeamName'));
