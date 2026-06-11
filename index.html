@@ -111,7 +111,7 @@
             <i class="fas fa-calendar-alt"></i> <span data-i18n="decideGame">Decide Game</span>
           </button>
           <p id="lockWarning" class="text-xs text-amber-400/80 text-center mt-2">
-            <i class="fas fa-info-circle mr-1"></i> <span data-i18n="lockWarning">Lock configurations to initialize fixtures.</span>
+            <i class="fas fa-info-circle mr-1"></i> <span data-i18n="lockWarning">Lock configurations to ialize fixtures.</span>
           </p>
         </div>
       </div>
@@ -293,7 +293,7 @@
       numTeams:"Number of Teams",updateLayout:"Update Layout",confirmLock:"Confirm & Lock Teams",
       gameSettings:"2. Game Settings",matchDuration:"Match Duration",mins:"mins",
       totalMatchesLabel:"Total Matches Planned",decideGame:"Decide Game",
-      lockWarning:"Lock configurations to initialize fixtures.",lockDone:"Settings locked.",
+      lockWarning:"Lock configurations to ialize fixtures.",lockDone:"Settings locked.",
       fixtureDashboard:"Fixture Dashboard",fixtureSubtitle:"Set up the pairings for the upcoming round.",
       homeTeam:"Home Team (A)",awayTeam:"Away Team (B)",roundSlot:"Round Slot",
       setupConfig:"Setup Configuration",okBtn:"OK",changeMatchup:"Change Matchup",
@@ -464,80 +464,80 @@
   // ---------------------------------------------------------------
   // INIT
   // ---------------------------------------------------------------
-  function init(){
-    showSyncBanner('connecting');
-    // Load config from Firebase
-    fbGet('configuration').then(snap=>{
-      if(snap.exists()){
-        configuration=snap.val();
-        if(!configuration.teams) configuration.teams={};
-        document.getElementById('matchMinutes').value=configuration.matchMinutes||25;
-        document.getElementById('totalMatches').value=configuration.totalMatches||3;
-        workingTeamsCount=Object.keys(configuration.teams).length||2;
-        document.getElementById('numTeamsInput').value=workingTeamsCount;
-        enableDecideGame(true);
-      }
-      buildTeamUIContainer();
-    });
+  async function init() {
+  showSyncBanner('connecting');
 
-    fbGet('activeBout').then(snap=>{
-      if(snap.exists()) activeBout=snap.val();
-    });
+  try {
+    const [configSnap, activeBoutSnap, clockSnap] = await Promise.all([
+      fbGet('configuration'),
+      fbGet('activeBout'),
+      fbGet('clockState')
+    ]);
 
-    fbGet('clockState').then(snap=>{
-      if(snap.exists()) clockState=snap.val();
-      routeToSavedPageContext();
-    });
+    if (configSnap.exists()) {
+      configuration = configSnap.val();
 
-    // Live listeners
-    fbListen('globalHistoricalRegistry', val=>{
-      globalHistoricalRegistry = val ? (Array.isArray(val) ? val : Object.values(val)) : [];
-    });
+      if (!configuration.teams)
+        configuration.teams = {};
 
-    // Live score listener — updates viewer pages in real time
-    fbListen('activeBout', val=>{
-      if(!val) return;
-      activeBout=val;
-      if(clockState.activePage==='trackerPage'){
-        document.getElementById('scoreA').innerText=activeBout.scoreA;
-        document.getElementById('scoreB').innerText=activeBout.scoreB;
-        renderTimelineDOM();
-      }
-    });
+      document.getElementById('matchMinutes').value =
+        configuration.matchMinutes || 25;
 
-    showSyncBanner('live');
-    clockTickerInterval=setInterval(synchronizedClockTick,200);
-    setLanguage(currentLang);
-  }
+      document.getElementById('totalMatches').value =
+        configuration.totalMatches || 3;
 
-  document.addEventListener('fbReady', init);
+      workingTeamsCount =
+        Object.keys(configuration.teams).length || 2;
 
-  function routeToSavedPageContext(){
-    ['setupPage','matchupPage','trackerPage'].forEach(p=>document.getElementById(p).classList.add('hidden'));
-    if(clockState.activePage==='trackerPage' && activeBout.teamAKey){
-      hydrateTrackerUI();
-      document.getElementById('trackerPage').classList.remove('hidden');
-    } else if(clockState.activePage==='matchupPage'){
-      goToMatchupSelection();
-    } else {
-      clockState.activePage='setupPage';
-      document.getElementById('setupPage').classList.remove('hidden');
+      document.getElementById('numTeamsInput').value =
+        workingTeamsCount;
+
+      enableDecideGame(true);
     }
-  }
 
-  function saveAll(){
-    fbSet('configuration', configuration);
-    fbSet('activeBout', activeBout);
-    fbSet('clockState', clockState);
-    fbSet('globalHistoricalRegistry', globalHistoricalRegistry);
-  }
-
-  function clearAllStoredData(){
-    if(confirm(t('wipeConfirm'))){
-      fbSet('/', null).then(()=>location.reload());
+    if (activeBoutSnap.exists()) {
+      activeBout = activeBoutSnap.val();
     }
+
+    if (clockSnap.exists()) {
+      clockState = clockSnap.val();
+    }
+
+    buildTeamUIContainer();
+      console.log(
+        "Loaded teams:",
+        Object.keys(configuration?.teams || {})
+      );
+    // IMPORTANT:
+    // route only after configuration + activeBout + clockState are loaded
+    routeToSavedPageContext();
+
+  } catch (err) {
+    console.error(err);
+    showSyncBanner('error');
   }
 
+  fbListen('globalHistoricalRegistry', val => {
+    globalHistoricalRegistry =
+      val ? (Array.isArray(val) ? val : Object.values(val)) : [];
+  });
+
+  fbListen('activeBout', val => {
+    if (!val) return;
+
+    activeBout = val;
+
+    if (clockState.activePage === 'trackerPage') {
+      document.getElementById('scoreA').innerText = activeBout.scoreA;
+      document.getElementById('scoreB').innerText = activeBout.scoreB;
+      renderTimelineDOM();
+    }
+  });
+
+  showSyncBanner('live');
+  clockTickerInterval = setInterval(synchronizedClockTick, 200);
+  setLanguage(currentLang);
+}
   // ---------------------------------------------------------------
   // PHASE 1: CONFIGURATION
   // ---------------------------------------------------------------
